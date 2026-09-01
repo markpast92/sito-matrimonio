@@ -16,12 +16,20 @@ No test framework or linter is configured.
 
 **Next.js 15 App Router** + TypeScript + Tailwind CSS v4. All pages are under `app/`, shared components under `components/`, utilities under `lib/`.
 
-### Auth flow (two-tier)
+### Auth flow (single login)
 
 `middleware.ts` intercepts every request (except `_next/static`, `_next/image`, `favicon.ico`):
 
-1. **Guest gate** — checks `site_auth=ok` cookie. Missing → redirect to `/password`. `/api/auth` sets this cookie for 30 days.
-2. **Admin gate** — `/admin/*` (except `/admin/login`) additionally requires `admin_auth=ok` cookie set by `/api/admin-auth`.
+1. **Guest gate** — checks `site_auth=ok` cookie. Missing → redirect to `/password`.
+2. **Admin gate** — `/admin/*` additionally requires `admin_auth=ok` cookie.
+
+There is **one login page only**: `/password`. `/api/auth` handles both cases:
+- `SITE_PASSWORD` → sets `site_auth=ok` (30 days), redirects to `/`
+- `ADMIN_PASSWORD` → sets both `site_auth=ok` and `admin_auth=ok`, redirects to `/admin`
+
+Logout (`/api/logout`) deletes both cookies and redirects to `/password`. Guests can never reach `/admin` even if they know the URL — the middleware always sends them back to `/password`.
+
+`Nav` accepts a `simple` boolean prop: when true (used in the admin page) it renders only the M&C logo and the Esci button, hiding all guest navigation links.
 
 Guest name is collected once in `HomeClient` and stored in `localStorage` as `guest_name` / `guest_surname`. Pages pre-fill forms from localStorage on mount.
 
@@ -53,7 +61,7 @@ Defined in `app/globals.css` via Tailwind v4 `@theme` block as CSS custom proper
 
 ### Shared constants
 
-`lib/constants.ts` holds `greetGuest(name)` (gender-neutral greeting), `WEDDING_DATE`, `WEDDING_LOCATION`, `WEDDING_MAPS_URL`. Always update here, not in individual pages.
+`lib/constants.ts` holds `greetGuest(name)` (gender-neutral greeting), `WEDDING_DATE`, `WEDDING_LOCATION`, `WEDDING_VENUE_URL` (venue website), `WEDDING_MAPS_URL` (Google Maps pin). Always update here, not in individual pages.
 
 ## Environment variables
 
@@ -61,6 +69,7 @@ Required in `.env` (never commit this file):
 
 ```
 SITE_PASSWORD=
+ADMIN_PASSWORD=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
@@ -69,11 +78,6 @@ RESEND_FROM=
 WEDDING_IBAN=
 WEDDING_INTESTATARIO=
 WEDDING_CAUSALE_PREFIX=
-ADMIN_USER_1=
-ADMIN_EMAIL_1=
-ADMIN_USER_2=
-ADMIN_EMAIL_2=
-ADMIN_PASSWORD=
 ```
 
 `NEXT_PUBLIC_*` variables are safe to expose to the browser. All others are server-only.

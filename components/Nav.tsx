@@ -9,7 +9,7 @@ const links = [
   { href: '/regalo', label: 'Regalo' },
 ]
 
-export default function Nav() {
+export default function Nav({ simple }: { simple?: boolean }) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
 
@@ -17,6 +17,29 @@ export default function Nav() {
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href)
+
+  const logoutButton = (className: string, label: string) => (
+    <form action="/api/logout" method="POST">
+      <button type="submit" className={className}>{label}</button>
+    </form>
+  )
+
+  // Nav semplificata per l'area admin
+  if (simple) {
+    return (
+      <nav className="bg-nav-gradient text-white sticky top-0 z-40 shadow-md">
+        <div className="flex items-center justify-between px-5 py-4">
+          <span className="font-[family-name:var(--font-lora)] text-xl font-semibold tracking-wide text-white">
+            M &amp; C
+          </span>
+          {logoutButton(
+            'text-white/60 hover:text-white text-sm transition-colors font-[family-name:var(--font-inter)] underline underline-offset-2',
+            'Esci'
+          )}
+        </div>
+      </nav>
+    )
+  }
 
   return (
     <nav className="bg-nav-gradient text-white sticky top-0 z-40 shadow-md">
@@ -52,14 +75,12 @@ export default function Nav() {
         </ul>
 
         {/* Logout desktop */}
-        <form action="/api/logout" method="POST" className="hidden md:block shrink-0">
-          <button
-            type="submit"
-            className="text-white/60 hover:text-white text-sm transition-colors font-[family-name:var(--font-inter)] underline underline-offset-2"
-          >
-            Esci
-          </button>
-        </form>
+        <div className="hidden md:block shrink-0">
+          {logoutButton(
+            'text-white/60 hover:text-white text-sm transition-colors font-[family-name:var(--font-inter)] underline underline-offset-2',
+            'Esci'
+          )}
+        </div>
 
         {/* Hamburger — mobile */}
         <div className="flex-1 flex justify-end md:hidden">

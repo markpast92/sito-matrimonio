@@ -10,7 +10,6 @@ const PLAYLIST_URL = 'https://soundcloud.com/marco-pastorello-609505187/sets/sit
 export default function MusicPlayer() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const widgetRef = useRef<any>(null)
-  const startedRef = useRef(false)
   const initRef = useRef(false)
   const [playing, setPlaying] = useState(false)
   const [ready, setReady] = useState(false)
@@ -26,30 +25,14 @@ export default function MusicPlayer() {
     script.onload = () => {
       if (!iframeRef.current) return
       const widget = window.SC.Widget(iframeRef.current)
-      widget.bind(window.SC.Widget.Events.READY, () => {
-        widgetRef.current = widget
-        setReady(true)
-      })
+      widgetRef.current = widget
+      widget.bind(window.SC.Widget.Events.READY, () => setReady(true))
+      widget.bind(window.SC.Widget.Events.PLAY, () => setPlaying(true))
+      widget.bind(window.SC.Widget.Events.PAUSE, () => setPlaying(false))
       widget.bind(window.SC.Widget.Events.FINISH, () => setPlaying(false))
     }
     document.body.appendChild(script)
   }, [])
-
-  function startPlayback() {
-    const widget = widgetRef.current
-    if (!widget) return
-    if (!startedRef.current) {
-      startedRef.current = true
-      widget.getSounds((sounds: any[]) => {
-        if (sounds.length > 1) widget.skip(Math.floor(Math.random() * sounds.length))
-        widget.play()
-        setPlaying(true)
-      })
-    } else {
-      widget.play()
-      setPlaying(true)
-    }
-  }
 
   const toggle = () => {
     const widget = widgetRef.current
@@ -57,23 +40,21 @@ export default function MusicPlayer() {
 
     if (playing) {
       widget.pause()
-      setPlaying(false)
       return
     }
 
-    // Prima di avviare: se il volume non è stato confermato, mostra avviso
     if (!volumeOk) {
       setShowVolumeWarning(true)
       return
     }
 
-    startPlayback()
+    widget.play()
   }
 
   function confirmVolume() {
     setVolumeOk(true)
     setShowVolumeWarning(false)
-    startPlayback()
+    widgetRef.current?.play()
   }
 
   return (
@@ -82,7 +63,7 @@ export default function MusicPlayer() {
       <iframe
         ref={iframeRef}
         style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '300px', height: '80px' }}
-        src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(PLAYLIST_URL)}&auto_play=false&hide_related=true&show_comments=false`}
+        src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(PLAYLIST_URL)}&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&buying=false&sharing=false&download=false`}
         allow="autoplay"
       />
 

@@ -13,11 +13,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/password', request.url))
   }
 
-  // Gate admin per /admin/* (escluso /admin/login)
-  if (pathname.startsWith('/admin') && !pathname.startsWith('/admin/login')) {
+  // Gate admin per /admin/*
+  if (pathname.startsWith('/admin')) {
     const adminAuth = request.cookies.get('admin_auth')?.value
     if (adminAuth !== 'ok') {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      return NextResponse.redirect(new URL('/password', request.url))
     }
   }
 

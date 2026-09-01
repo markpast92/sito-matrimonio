@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Nav from '@/components/Nav'
-import { greetGuest, WEDDING_DATE, WEDDING_LOCATION, WEDDING_MAPS_URL } from '@/lib/constants'
+import { greetGuest, WEDDING_DATE, WEDDING_LOCATION, WEDDING_VENUE_URL, WEDDING_MAPS_URL } from '@/lib/constants'
 
 export default function HomeClient() {
   const [name, setName] = useState<string | null>(null)
@@ -94,36 +94,74 @@ export default function HomeClient() {
 
         <hr className="divider-sunset mb-6" />
 
-        <p className="text-night/70 text-lg sm:text-xl font-[family-name:var(--font-inter)] mb-2">
+        <p className="text-night/70 text-lg sm:text-xl font-[family-name:var(--font-inter)] mb-6">
           {WEDDING_DATE}
         </p>
-        <a
-          href={WEDDING_MAPS_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-night/60 text-base sm:text-lg underline underline-offset-4 hover:text-night transition-colors font-[family-name:var(--font-inter)]"
-        >
-          {WEDDING_LOCATION} — apri mappa
-        </a>
+
+        {/* Location card */}
+        <div className="w-full max-w-sm mx-auto rounded-2xl shadow-lg overflow-hidden mb-2 border border-white/30">
+          {/* Mappa piccola */}
+          <div className="w-full h-32">
+            <iframe
+              title="Mappa location"
+              width="100%"
+              height="100%"
+              style={{ border: 0, display: 'block' }}
+              loading="lazy"
+              src="https://maps.google.com/maps?q=Via+Giuseppe+Pavone+91,+90151+Palermo&output=embed&z=15"
+            />
+          </div>
+          {/* Info + link */}
+          <div className="bg-white/80 backdrop-blur-sm px-4 py-3 flex flex-col items-center gap-2.5">
+            <div className="text-center">
+              <p className="text-night font-semibold text-base font-[family-name:var(--font-inter)]">
+                {WEDDING_LOCATION}
+              </p>
+              <p className="text-dust text-sm font-[family-name:var(--font-inter)]">
+                Via Giuseppe Pavone 91 — Mondello, Palermo
+              </p>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              <a
+                href={WEDDING_VENUE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 bg-night text-white rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-night/80 transition-colors font-[family-name:var(--font-inter)]"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Sito della location
+              </a>
+              <a
+                href={WEDDING_MAPS_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 bg-sunset text-white rounded-lg px-3 py-1.5 text-xs font-semibold hover:bg-sunset/80 transition-colors font-[family-name:var(--font-inter)]"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Indicazioni stradali
+              </a>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* CTA section */}
-      <section className="bg-white px-5 py-12">
-        <p className="text-center text-dust text-base sm:text-lg mb-8 leading-relaxed max-w-xl mx-auto font-[family-name:var(--font-inter)]">
+      <section className="bg-white px-5 py-10">
+        <p className="text-center text-dust text-base sm:text-lg mb-7 leading-relaxed max-w-xl mx-auto font-[family-name:var(--font-inter)]">
           Questo sito ti permette di confermare la tua presenza e, se vuoi,
           di inviarci un pensiero di auguri.
         </p>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-lg mx-auto animate-slide-up-delay">
+        <div className="flex flex-wrap justify-center gap-3 animate-slide-up-delay">
           <Link
             href="/rsvp"
-            className="btn-sunset py-5 px-4 text-lg text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sunset focus-visible:ring-offset-2 font-[family-name:var(--font-inter)]"
+            className="btn-sunset py-3.5 px-7 text-base text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sunset focus-visible:ring-offset-2 font-[family-name:var(--font-inter)]"
           >
             Confermo la mia presenza
           </Link>
           <Link
             href="/regalo"
-            className="border-2 border-night text-night rounded-2xl py-5 px-4 text-lg font-semibold text-center hover:bg-night hover:text-white hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-night focus-visible:ring-offset-2 font-[family-name:var(--font-inter)]"
+            className="border-2 border-night text-night rounded-2xl py-3.5 px-7 text-base font-semibold text-center hover:bg-night hover:text-white hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-night focus-visible:ring-offset-2 font-[family-name:var(--font-inter)]"
           >
             Voglio fare un regalo
           </Link>

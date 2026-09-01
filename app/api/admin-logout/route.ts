@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
-  const res = NextResponse.redirect(new URL('/admin/login', req.url))
+  const res = NextResponse.redirect(new URL('/password', req.url))
   res.cookies.delete('admin_auth')
+  res.cookies.delete('site_auth')
   return res
 }

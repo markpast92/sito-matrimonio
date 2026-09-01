@@ -26,7 +26,7 @@ export async function POST(req: Request) {
           <p style="margin:0"><strong>Intestatario:</strong> ${process.env.WEDDING_INTESTATARIO}</p>
           <p style="margin:0"><strong>Causale:</strong> ${process.env.WEDDING_CAUSALE_PREFIX} &mdash; ${nomeSaluto}</p>
         </div>
-        ${importo ? `<p>Hai indicato un importo orientativo di <strong>&euro;${importo}</strong> &mdash; non c&apos;è nessun obbligo!</p>` : ''}
+        ${importo ? `<p>Hai indicato che intendi versare <strong>&euro;${importo}</strong>. Naturalmente, potrai effettuare il bonifico per la cifra che preferisci.</p>` : ''}
         ${messaggio ? `<blockquote style="border-left:3px solid #E6A67D;padding-left:16px;color:#767293;font-style:italic">&ldquo;${messaggio}&rdquo;</blockquote>` : ''}
         <p style="margin-top:24px">A presto,<br><strong>Marco &amp; Cristina</strong></p>
       </div>

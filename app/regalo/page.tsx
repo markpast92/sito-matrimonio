@@ -99,7 +99,7 @@ export default function RegaloPage() {
           </div>
           <div>
             <label className="text-night text-base font-semibold block mb-2 font-[family-name:var(--font-inter)]">
-              Importo orientativo <span className="text-dust font-normal">(facoltativo, in euro)</span>
+              Cifra che intendi versare <span className="text-dust font-normal">(facoltativa, in euro)</span>
             </label>
             <input type="number" value={form.importo} onChange={e => update('importo', e.target.value)}
               placeholder="Es. 50" min="1" className={inputCls} />

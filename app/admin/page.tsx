@@ -47,19 +47,11 @@ export default async function AdminPage() {
 
   return (
     <>
-      <Nav />
+      <Nav simple />
       <div className="bg-page-top h-24 -mb-24 pointer-events-none" />
       <main className="max-w-5xl mx-auto px-5 py-10">
         <div className="flex justify-between items-center mb-8 flex-wrap gap-4">
           <h1 className="text-xl sm:text-3xl font-bold text-night">Dashboard Admin</h1>
-          <form action="/api/admin-logout" method="POST">
-            <button
-              type="submit"
-              className="text-dust underline text-base hover:text-night transition-colors font-[family-name:var(--font-inter)]"
-            >
-              Esci
-            </button>
-          </form>
         </div>
 
         {dbError && (
