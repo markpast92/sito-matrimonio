@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS regali (
   messaggio  text
 );
 
--- Row Level Security: disabilita (il sito accede solo via service role key server-side)
-ALTER TABLE rsvp               DISABLE ROW LEVEL SECURITY;
-ALTER TABLE rsvp_accompagnatori DISABLE ROW LEVEL SECURITY;
-ALTER TABLE regali             DISABLE ROW LEVEL SECURITY;
+-- RLS abilitata su tutte le tabelle.
+-- La service role key (usata dalle API routes server-side) bypassa sempre RLS.
+-- La anon key (pubblica nel browser) non ha accesso a nessuna tabella — nessuna policy = nessun permesso.
