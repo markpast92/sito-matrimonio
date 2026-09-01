@@ -61,7 +61,7 @@ dove le chiavi segrete non sono visibili all'utente.
 | File | Cosa fa |
 |------|---------|
 | `app/globals.css` | **Font di base, colori del tema, dimensione testo globale.** Modifica qui. |
-| `app/layout.tsx` | Layout radice: carica il font Google (Lora), applica la classe body |
+| `app/layout.tsx` | Layout radice: carica il font Google (Lora), applica la classe body, monta MusicPlayer |
 
 ### Pagine (quello che vede l'utente)
 | File | Sezione |
@@ -70,7 +70,7 @@ dove le chiavi segrete non sono visibili all'utente.
 | `app/password/page.tsx` | Pagina di accesso con la password |
 | `app/rsvp/page.tsx` | Form conferma presenza |
 | `app/regalo/page.tsx` | Form regalo di nozze |
-| `app/musica/page.tsx` | Player Spotify |
+| `app/musica/page.tsx` | Pagina musica (avviso volume, link diretto alla playlist) |
 | `app/admin/page.tsx` | Dashboard admin (tabelle RSVP e regali) |
 | `app/admin/login/page.tsx` | Login admin |
 
@@ -79,6 +79,7 @@ dove le chiavi segrete non sono visibili all'utente.
 |------|---------|
 | `components/Nav.tsx` | Barra di navigazione in cima a ogni pagina |
 | `components/HomeClient.tsx` | Home page interattiva: overlay nome alla prima visita, saluto, bottoni |
+| `components/MusicPlayer.tsx` | Player musicale floating (SoundCloud): icona speaker fissa in basso a destra, canzone random dalla playlist all'avvio |
 
 ### Dati e logica condivisa
 | File | Cosa fa |
@@ -212,7 +213,7 @@ RESEND_FROM                       indirizzo mittente email
 WEDDING_IBAN                      IBAN per i bonifici regalo
 WEDDING_INTESTATARIO              intestatario del conto
 WEDDING_CAUSALE_PREFIX            inizio della causale ("Regalo matrimonio...")
-NEXT_PUBLIC_SPOTIFY_PLAYLIST_ID   ID della playlist Spotify (parte finale dell'URL)
+SOUNDCLOUD_PLAYLIST_URL           (non in .env — hardcoded in components/MusicPlayer.tsx) URL della playlist SoundCloud
 ADMIN_USER_1 / ADMIN_USER_2       username admin
 ADMIN_PASSWORD                    password admin
 NODE_TLS_REJECT_UNAUTHORIZED=0    solo in locale se la rete ha SSL inspection
@@ -235,5 +236,6 @@ Crea tre tabelle: `rsvp`, `rsvp_accompagnatori`, `regali`.
 - [x] Fase 4 — Regalo
 - [x] Fase 5 — Musica
 - [x] Fase 8 — Dashboard admin
+- [x] Extra — MusicPlayer floating SoundCloud (background su tutto il sito)
 - [ ] Fase 6 — QR code e distribuzione
 - [ ] Fase 7 — Deploy Vercel
