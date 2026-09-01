@@ -14,9 +14,10 @@ export default function MusicPlayer() {
   const initRef = useRef(false)
   const [playing, setPlaying] = useState(false)
   const [ready, setReady] = useState(false)
+  const [showVolumeWarning, setShowVolumeWarning] = useState(false)
+  const [volumeOk, setVolumeOk] = useState(false)
 
   useEffect(() => {
-    // ponytail: guard against React Strict Mode double-invoke
     if (initRef.current) return
     initRef.current = true
 
@@ -34,43 +35,100 @@ export default function MusicPlayer() {
     document.body.appendChild(script)
   }, [])
 
-  const toggle = () => {
+  function startPlayback() {
     const widget = widgetRef.current
     if (!widget) return
-    if (playing) {
-      widget.pause()
-      setPlaying(false)
+    if (!startedRef.current) {
+      startedRef.current = true
+      widget.getSounds((sounds: any[]) => {
+        if (sounds.length > 1) widget.skip(Math.floor(Math.random() * sounds.length))
+        widget.play()
+        setPlaying(true)
+      })
     } else {
-      if (!startedRef.current) {
-        startedRef.current = true
-        // ponytail: getSounds at click time, READY-time call is unreliable with playlists
-        widget.getSounds((sounds: any[]) => {
-          if (sounds.length > 1) widget.skip(Math.floor(Math.random() * sounds.length))
-          widget.play()
-          setPlaying(true)
-        })
-        return
-      }
       widget.play()
       setPlaying(true)
     }
   }
 
+  const toggle = () => {
+    const widget = widgetRef.current
+    if (!widget) return
+
+    if (playing) {
+      widget.pause()
+      setPlaying(false)
+      return
+    }
+
+    // Prima di avviare: se il volume non è stato confermato, mostra avviso
+    if (!volumeOk) {
+      setShowVolumeWarning(true)
+      return
+    }
+
+    startPlayback()
+  }
+
+  function confirmVolume() {
+    setVolumeOk(true)
+    setShowVolumeWarning(false)
+    startPlayback()
+  }
+
   return (
     <>
-      {/* ponytail: off-screen with real dimensions, display:none and w-px break SC Widget init */}
+      {/* Off-screen — display:none e w-px rompono il SC Widget */}
       <iframe
         ref={iframeRef}
         style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '300px', height: '80px' }}
         src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(PLAYLIST_URL)}&auto_play=false&hide_related=true&show_comments=false`}
         allow="autoplay"
       />
+
+      {/* Volume warning popover */}
+      {showVolumeWarning && (
+        <div
+          className="fixed z-50 animate-slide-up"
+          style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))', right: '1.5rem' }}
+        >
+          <div className="bg-night text-white rounded-2xl shadow-2xl p-5 w-64">
+            <p className="text-2xl mb-2 text-center">🔊</p>
+            <p className="text-base font-semibold text-center mb-1">Alza il volume!</p>
+            <p className="text-sm text-white/70 text-center mb-4 font-[family-name:var(--font-inter)]">
+              Per favore alza il volume del dispositivo prima di avviare la musica.
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowVolumeWarning(false)}
+                className="flex-1 py-2 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 transition-colors font-[family-name:var(--font-inter)]"
+              >
+                Annulla
+              </button>
+              <button
+                onClick={confirmVolume}
+                className="flex-1 py-2 rounded-xl bg-sunset text-white text-sm font-semibold hover:opacity-90 transition-opacity font-[family-name:var(--font-inter)]"
+              >
+                Avvia
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Floating play/pause button */}
       <button
         onClick={toggle}
         disabled={!ready}
         title={playing ? 'Pausa musica' : 'Riproduci musica'}
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-colors disabled:opacity-40 disabled:cursor-wait"
-        style={{ backgroundColor: playing ? '#E6A67D' : '#193250', color: 'white' }}
+        aria-label={playing ? 'Pausa musica' : 'Riproduci musica'}
+        className="fixed z-50 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-200 disabled:opacity-40 disabled:cursor-wait hover:scale-110 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sunset focus-visible:ring-offset-2"
+        style={{
+          bottom: 'calc(1.5rem + env(safe-area-inset-bottom))',
+          right: '1.5rem',
+          backgroundColor: playing ? '#E6A67D' : '#193250',
+          color: 'white',
+        }}
       >
         {playing ? (
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">

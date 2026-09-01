@@ -8,8 +8,7 @@ export default function AdminLoginPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setLoading(true)
-    setError('')
+    setLoading(true); setError('')
     try {
       const res = await fetch('/api/admin-auth', {
         method: 'POST',
@@ -29,36 +28,27 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="min-h-screen bg-pale flex items-center justify-center p-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
-        <h1 className="text-3xl font-bold text-night mb-2 text-center">
-          Area admin
-        </h1>
-        <p className="text-dust text-center mb-8">Accesso riservato a Marco e Cristina</p>
+    <main className="min-h-screen bg-white flex items-center justify-center p-5">
+      <div className="card p-8 w-full max-w-sm animate-slide-up">
+        <h1 className="text-xl sm:text-2xl font-bold text-night mb-1 text-center">Area admin</h1>
+        <p className="text-dust text-center text-sm mb-7 font-[family-name:var(--font-inter)]">
+          Accesso riservato a Marco e Cristina
+        </p>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="Username"
-            value={form.username}
+          <input type="text" placeholder="Username" value={form.username}
             onChange={e => setForm(f => ({ ...f, username: e.target.value }))}
-            className="border-2 border-lilac rounded-xl p-4 text-xl outline-none focus:border-sunset"
-            autoComplete="username"
-            autoFocus
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={form.password}
+            className="border-2 border-lilac rounded-xl px-4 py-3.5 text-lg outline-none focus:border-sunset focus:ring-2 focus:ring-sunset/20 transition-all placeholder:text-dust/50 font-[family-name:var(--font-inter)]"
+            autoComplete="username" autoFocus />
+          <input type="password" placeholder="Password" value={form.password}
             onChange={e => setForm(f => ({ ...f, password: e.target.value }))}
-            className="border-2 border-lilac rounded-xl p-4 text-xl outline-none focus:border-sunset"
-            autoComplete="current-password"
-          />
-          {error && <p className="text-red-600 text-center font-medium">{error}</p>}
-          <button
-            type="submit"
-            disabled={loading || !form.username || !form.password}
-            className="bg-night text-white rounded-xl p-4 text-xl font-semibold disabled:opacity-50 hover:opacity-90 transition-opacity"
-          >
+            className="border-2 border-lilac rounded-xl px-4 py-3.5 text-lg outline-none focus:border-sunset focus:ring-2 focus:ring-sunset/20 transition-all placeholder:text-dust/50 font-[family-name:var(--font-inter)]"
+            autoComplete="current-password" />
+          {error && (
+            <p className="text-red-500 text-center font-medium text-sm font-[family-name:var(--font-inter)]">{error}</p>
+          )}
+          <button type="submit" disabled={loading || !form.username || !form.password}
+            className="py-4 text-lg rounded-2xl font-semibold text-white transition-all duration-200 hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-night focus-visible:ring-offset-2 font-[family-name:var(--font-inter)]"
+            style={{ background: 'linear-gradient(135deg, #193250 0%, #22416a 100%)' }}>
             {loading ? 'Accesso...' : 'Entra'}
           </button>
         </form>
