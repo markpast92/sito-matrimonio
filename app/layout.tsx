@@ -18,6 +18,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Marco & Cristina',
   description: 'Il nostro matrimonio',
+  icons: { icon: '/icon.png' },
 }
 
 export const viewport: Viewport = {
