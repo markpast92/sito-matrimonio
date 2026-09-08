@@ -191,3 +191,4 @@ Crea tre tabelle: `rsvp`, `rsvp_accompagnatori`, `regali`.
 - [x] Auth unificata — unico login per ospiti e sposi
 - [ ] Fase 6 — QR code e distribuzione
 - [ ] Fase 7 — Deploy Vercel
+- [ ] Anti-duplicato RSVP — popup se nome+cognome già registrato (ospite principale o accompagnatore)
