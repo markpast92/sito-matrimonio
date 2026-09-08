@@ -19,7 +19,7 @@ Inserisci la password dal file `.env` (`SITE_PASSWORD` per gli ospiti, `ADMIN_PA
 
 ## Come è fatto — architettura in breve
 
-Il sito è una **single-page app con 5 sezioni**: password → home → RSVP → regalo → musica.
+Il sito ha 5 sezioni: password → home → RSVP → regalo → musica.
 C'è anche una **dashboard admin** raggiungibile su `/admin`.
 
 ```
@@ -39,16 +39,13 @@ app/api/ (le API)      ← codice che gira sul server (invisibile all'utente)
     └── Resend          ← email (coordinate bancarie)
 ```
 
-### Flusso di autenticazione (unico login)
+### Flusso di autenticazione
 
 C'è **un solo punto di accesso**: `/password`.
 - Password ospiti (`SITE_PASSWORD`) → cookie `site_auth=ok` → home
 - Password sposi (`ADMIN_PASSWORD`) → cookie `site_auth=ok` + `admin_auth=ok` → dashboard
 - "Esci" dalla dashboard cancella entrambi i cookie e torna a `/password`
 - Un ospite non può mai raggiungere `/admin` anche conoscendo l'URL
-
-**Regola principale**: tutto quello che riguarda il database e le email avviene nelle
-API routes (cartella `app/api/`), mai direttamente nelle pagine.
 
 ---
 
@@ -65,11 +62,11 @@ API routes (cartella `app/api/`), mai direttamente nelle pagine.
 ### Stili e tema
 | File | Cosa fa |
 |------|---------|
-| `app/globals.css` | **Font di base, colori del tema, dimensione testo globale.** Modifica qui. |
+| `app/globals.css` | Font di base, colori del tema, dimensione testo globale. Modifica qui. |
 | `app/layout.tsx` | Layout radice: carica i font Google, monta MusicPlayer |
-| `app/icon.png` | Favicon del sito (rilevata automaticamente da Next.js) |
+| `app/icon.png` | Favicon del sito |
 
-### Pagine (quello che vede l'utente)
+### Pagine
 | File | Sezione |
 |------|---------|
 | `app/page.tsx` | Home — carica `HomeClient` |
@@ -82,23 +79,22 @@ API routes (cartella `app/api/`), mai direttamente nelle pagine.
 ### Componenti riutilizzabili
 | File | Cosa fa |
 |------|---------|
-| `components/Nav.tsx` | Barra di navigazione. Prop `simple` per la dashboard admin (solo M&C + Esci) |
-| `components/HomeClient.tsx` | Home page interattiva: overlay nome alla prima visita, saluto, mappa location, bottoni |
+| `components/Nav.tsx` | Barra di navigazione. Prop `simple` per la dashboard admin |
+| `components/HomeClient.tsx` | Home page interattiva: overlay nome, saluto, mappa, bottoni |
 | `components/MusicPlayer.tsx` | Player floating SoundCloud: icona speaker fissa in basso a destra |
 
 ### Dati e logica condivisa
 | File | Cosa fa |
 |------|---------|
-| `lib/constants.ts` | Data, location, URL venue e Google Maps, formula del saluto — **modifica qui** |
+| `lib/constants.ts` | Data, location, URL venue e Google Maps, formula del saluto — modifica qui |
 | `lib/supabase.ts` | Crea il client Supabase (usato solo nelle API) |
 
-### API routes (codice server — non visibile all'utente)
+### API routes (codice server)
 | File | Cosa fa |
 |------|---------|
-| `app/api/auth/route.ts` | Unico login: verifica password ospite o admin, imposta i cookie |
+| `app/api/auth/route.ts` | Login: verifica password ospite o admin, imposta i cookie |
 | `app/api/logout/route.ts` | Cancella tutti i cookie e reindirizza a `/password` |
-| `app/api/admin-logout/route.ts` | Alias di logout per la dashboard (stesso comportamento) |
-| `app/api/rsvp/route.ts` | Salva (o aggiorna) un RSVP su Supabase |
+| `app/api/rsvp/route.ts` | Salva o aggiorna un RSVP su Supabase |
 | `app/api/regalo/route.ts` | Invia l'email con IBAN via Resend, salva su Supabase |
 
 ---
@@ -122,8 +118,7 @@ Tutto il tema è in **`app/globals.css`**, nel blocco `@theme`:
 Cambia i valori esadecimali e il colore si aggiorna ovunque nel sito.
 Nei componenti i colori si usano come classi Tailwind: `bg-sunset`, `text-night`, `border-lilac`, ecc.
 
-> Verifica sempre che il contrasto testo/sfondo sia leggibile (standard AA):
-> usa [https://webaim.org/resources/contrastchecker/](https://webaim.org/resources/contrastchecker/)
+Verifica sempre che il contrasto testo/sfondo sia leggibile (standard AA) con [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/).
 
 ### Cambiare il font
 
@@ -152,11 +147,13 @@ Per cambiarlo: sostituisci `Lora` con qualsiasi font di [Google Fonts](https://f
 
 ### Favicon
 
-Sostituisci `app/icon.png` con la tua immagine. Next.js la rileva automaticamente.
+Sostituisci `app/icon.png` e `public/icon.png` con la tua immagine.
 
 ---
 
 ## Variabili d'ambiente (`.env`)
+
+Il file `.env` non va mai su GitHub. Va creato manualmente in locale e le stesse variabili vanno inserite su Vercel (Settings → Environment Variables).
 
 ```
 SITE_PASSWORD                     password che gli ospiti inseriscono per entrare
@@ -180,15 +177,35 @@ Crea tre tabelle: `rsvp`, `rsvp_accompagnatori`, `regali`.
 
 ---
 
-## Fasi completate / da fare
+## Deploy su Vercel
 
-- [x] Fase 1 — Scaffold
-- [x] Fase 2 — Home page con mappa location
-- [x] Fase 3 — RSVP
-- [x] Fase 4 — Regalo
-- [x] Fase 5 — Musica (SoundCloud floating player)
-- [x] Fase 8 — Dashboard admin
-- [x] Auth unificata — unico login per ospiti e sposi
-- [ ] Fase 6 — QR code e distribuzione
-- [ ] Fase 7 — Deploy Vercel
-- [ ] Anti-duplicato RSVP — popup se nome+cognome già registrato (ospite principale o accompagnatore)
+Il sito è ospitato su [Vercel](https://vercel.com) piano Hobby (gratuito).
+
+### Primo deploy
+
+1. Vai su [vercel.com](https://vercel.com) → **Add New → Project**
+2. Importa il repository GitHub `sito-matrimonio`
+3. Vercel rileva Next.js automaticamente — non toccare nulla nel form
+4. Espandi **Environment Variables** e inserisci tutte le variabili del `.env` (esclusa `NODE_TLS_REJECT_UNAUTHORIZED`, quella è solo per sviluppo locale)
+5. Clicca **Deploy**
+
+Il sito sarà disponibile su `sito-matrimonio-xxxx.vercel.app`.
+
+### Deploy continuo (CI/CD)
+
+Ogni `git push` su `main` trigghera automaticamente un nuovo deploy su Vercel. Non serve fare nulla di manuale.
+
+### Aggiornare una variabile d'ambiente
+
+Vercel → Settings → Environment Variables → modifica il valore → fai un nuovo deploy (o aspetta il prossimo push).
+
+---
+
+## Keep-alive Supabase
+
+Il piano free di Supabase mette in pausa i progetti dopo 7 giorni di inattività.
+Il workflow `.github/workflows/keep-alive.yml` fa un ping ogni 5 giorni, così il progetto non va mai in pausa.
+
+Richiede due secret nella repository GitHub (Settings → Secrets and variables → Actions):
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
