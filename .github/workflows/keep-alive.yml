@@ -2,7 +2,7 @@ name: Keep Supabase Alive
 
 on:
   schedule:
-    - cron: '0 8 */5 * *'  # ogni 5 giorni alle 8:00 UTC
+    - cron: '0 8 * * 1,4'  # ogni lunedì e giovedì alle 8:00 UTC (mai più di 4 giorni di gap)
   workflow_dispatch:        # permette di lanciarlo manualmente
 
 jobs:
@@ -13,5 +13,5 @@ jobs:
         run: |
           curl -sf -X GET "${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}/rest/v1/rsvp?limit=1" \
           -H "apikey: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" \
-          -H "Accept: application/json" \
-          && echo "Ping OK" || echo "Ping fallito"
+          -H "Accept: application/json"
+          echo "Ping OK"
