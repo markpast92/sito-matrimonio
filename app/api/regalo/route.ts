@@ -39,12 +39,18 @@ export async function POST(req: Request) {
   }
 
   const db = supabaseAdmin()
-  await db.from('regali').insert({
+  const { error: insertError } = await db.from('regali').insert({
     nome: nome?.trim() || null,
     email: email.trim(),
     importo: importo ? Number(importo) : null,
     messaggio: messaggio?.trim() || null,
   })
+
+  if (insertError) {
+    console.error('supabase insert error:', insertError)
+    // L'email è già partita — non chiedere all'utente di riprovare (riceverebbe una mail doppia).
+    // Logghiamo l'errore; si può recuperare il dato dal log Vercel.
+  }
 
   return NextResponse.json({ ok: true })
 }

@@ -145,6 +145,21 @@ export default function HomeClient() {
         </div>
       </section>
 
+      {/* Messaggio personale — TODO: sostituire con testo reale */}
+      <section className="bg-white px-5 pt-10 pb-4">
+        <div className="max-w-2xl mx-auto bg-info-gradient rounded-2xl p-6 sm:p-8">
+          <p className="font-[family-name:var(--font-lora)] text-night text-lg sm:text-xl italic leading-relaxed mb-4">
+            &ldquo;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua — e siamo felicissimi di condividere questo giorno con te.&rdquo;
+          </p>
+          <p className="text-dust text-sm sm:text-base font-[family-name:var(--font-inter)]">
+            Lorem ipsum adipiscing elit, sed do eiusmod tempor. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+          </p>
+          <p className="mt-4 text-night font-semibold font-[family-name:var(--font-lora)] text-base sm:text-lg">
+            — Marco &amp; Cristina
+          </p>
+        </div>
+      </section>
+
       {/* CTA section */}
       <section className="bg-white px-5 py-10">
         <p className="text-center text-dust text-base sm:text-lg mb-7 leading-relaxed max-w-xl mx-auto font-[family-name:var(--font-inter)]">

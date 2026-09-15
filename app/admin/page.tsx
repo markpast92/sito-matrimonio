@@ -1,5 +1,9 @@
 import { createClient } from '@supabase/supabase-js'
 import Nav from '@/components/Nav'
+import RsvpTable from '@/components/admin/RsvpTable'
+import RegaliTable from '@/components/admin/RegaliTable'
+
+export const dynamic = 'force-dynamic'
 
 type Accompagnatore = { id: string; nome: string; cognome: string; menu: string; allergie: string | null }
 type Rsvp = { id: string; created_at: string; nome: string; cognome: string; partecipa: boolean; menu: string; allergie: string | null; rsvp_accompagnatori: Accompagnatore[] }
@@ -68,93 +72,16 @@ export default async function AdminPage() {
         )}
 
         {/* Contatori RSVP */}
-        <h2 className="text-lg sm:text-2xl font-bold text-night mb-4">Presenze</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-          <Badge label="Confermati" value={confermati.length} color="bg-sunset/20 text-night" />
-          <Badge label="Non vengono" value={nonVengono.length} color="bg-dust/20 text-night" />
-          <Badge label="Risposte totali" value={rsvps.length} color="bg-lilac text-night" />
-          <Badge label="Persone totali" value={totPersone} color="bg-pale text-night border-2 border-lilac" />
+          <Badge label="Confermati" value={confermati.length} color="bg-sunset text-white shadow-sm" />
+          <Badge label="Non vengono" value={nonVengono.length} color="bg-dust/25 text-night" />
+          <Badge label="Risposte totali" value={rsvps.length} color="bg-lilac/80 text-night" />
+          <Badge label="Persone totali" value={totPersone} color="bg-night text-white shadow-sm" />
         </div>
 
-        {/* Tabella RSVP */}
-        {rsvps.length > 0 && (
-          <div className="card overflow-x-auto mb-12">
-            <table className="w-full text-left text-sm sm:text-base">
-              <thead>
-                <tr className="bg-night text-white">
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Nome</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Cognome</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Partecipa</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Menu</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Allergie</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Accompagnatori</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rsvps.map(r => (
-                  <tr key={r.id} className="border-t border-lilac">
-                    <td className="p-3 sm:p-4 font-medium">{r.nome}</td>
-                    <td className="p-3 sm:p-4">{r.cognome}</td>
-                    <td className="p-3 sm:p-4">{r.partecipa ? 'Sì' : 'No'}</td>
-                    <td className="p-3 sm:p-4 capitalize">{r.menu}</td>
-                    <td className="p-3 sm:p-4 text-dust">{r.allergie || '—'}</td>
-                    <td className="p-3 sm:p-4">
-                      {r.rsvp_accompagnatori?.length > 0 ? (
-                        <ul className="list-disc list-inside text-xs sm:text-sm font-[family-name:var(--font-inter)]">
-                          {r.rsvp_accompagnatori.map(a => (
-                            <li key={a.id}>
-                              {a.nome} {a.cognome} · {a.menu}
-                              {a.allergie ? ` · ${a.allergie}` : ''}
-                            </li>
-                          ))}
-                        </ul>
-                      ) : '—'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <RsvpTable rsvps={rsvps} />
 
-        {/* Regali */}
-        <h2 className="text-lg sm:text-2xl font-bold text-night mb-4">
-          Regali{' '}
-          {totImporti > 0 && (
-            <span className="text-sunset font-normal">— Totale dichiarato: €{totImporti}</span>
-          )}
-        </h2>
-
-        {regali.length === 0 ? (
-          <p className="text-dust text-lg font-[family-name:var(--font-inter)]">Nessuna richiesta regalo ancora.</p>
-        ) : (
-          <div className="card overflow-x-auto">
-            <table className="w-full text-left text-sm sm:text-base">
-              <thead>
-                <tr className="bg-night text-white">
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Nome</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Email</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Importo</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Messaggio</th>
-                  <th className="p-3 sm:p-4 font-[family-name:var(--font-inter)]">Data</th>
-                </tr>
-              </thead>
-              <tbody>
-                {regali.map(r => (
-                  <tr key={r.id} className="border-t border-lilac">
-                    <td className="p-3 sm:p-4">{r.nome || '—'}</td>
-                    <td className="p-3 sm:p-4">{r.email}</td>
-                    <td className="p-3 sm:p-4">{r.importo ? `€${r.importo}` : '—'}</td>
-                    <td className="p-3 sm:p-4 text-dust max-w-xs truncate font-[family-name:var(--font-inter)]">{r.messaggio || '—'}</td>
-                    <td className="p-3 sm:p-4 text-dust font-[family-name:var(--font-inter)]">
-                      {new Date(r.created_at).toLocaleDateString('it-IT')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <RegaliTable regali={regali} totImporti={totImporti} />
       </main>
     </>
   )
