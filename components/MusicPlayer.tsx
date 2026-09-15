@@ -13,8 +13,6 @@ export default function MusicPlayer() {
   const initRef = useRef(false)
   const [playing, setPlaying] = useState(false)
   const [ready, setReady] = useState(false)
-  const [showVolumeWarning, setShowVolumeWarning] = useState(false)
-  const [volumeOk, setVolumeOk] = useState(false)
 
   useEffect(() => {
     if (initRef.current) return
@@ -37,24 +35,7 @@ export default function MusicPlayer() {
   const toggle = () => {
     const widget = widgetRef.current
     if (!widget) return
-
-    if (playing) {
-      widget.pause()
-      return
-    }
-
-    if (!volumeOk) {
-      setShowVolumeWarning(true)
-      return
-    }
-
-    widget.play()
-  }
-
-  function confirmVolume() {
-    setVolumeOk(true)
-    setShowVolumeWarning(false)
-    widgetRef.current?.play()
+    if (playing) { widget.pause() } else { widget.play() }
   }
 
   return (
@@ -66,36 +47,6 @@ export default function MusicPlayer() {
         src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(PLAYLIST_URL)}&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&buying=false&sharing=false&download=false`}
         allow="autoplay"
       />
-
-      {/* Volume warning popover */}
-      {showVolumeWarning && (
-        <div
-          className="fixed z-50 animate-slide-up"
-          style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom))', right: '1.5rem' }}
-        >
-          <div className="bg-night text-white rounded-2xl shadow-2xl p-5 w-64">
-            <p className="text-2xl mb-2 text-center">🔊</p>
-            <p className="text-base font-semibold text-center mb-1">Alza il volume!</p>
-            <p className="text-sm text-white/70 text-center mb-4 font-[family-name:var(--font-inter)]">
-              Per favore alza il volume del dispositivo prima di avviare la musica.
-            </p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowVolumeWarning(false)}
-                className="flex-1 py-2 rounded-xl border border-white/20 text-white/70 text-sm hover:bg-white/10 transition-colors font-[family-name:var(--font-inter)]"
-              >
-                Annulla
-              </button>
-              <button
-                onClick={confirmVolume}
-                className="flex-1 py-2 rounded-xl bg-sunset text-white text-sm font-semibold hover:opacity-90 transition-opacity font-[family-name:var(--font-inter)]"
-              >
-                Avvia
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Floating play/pause button */}
       <button
