@@ -4,16 +4,34 @@ import Link from 'next/link'
 import Nav from '@/components/Nav'
 import { greetGuest, WEDDING_DATE, WEDDING_LOCATION, WEDDING_VENUE_URL, WEDDING_MAPS_URL } from '@/lib/constants'
 
+type RsvpBadge = 'si' | 'no' | 'accompagnatore' | 'none' | null
+
 export default function HomeClient() {
   const [name, setName] = useState<string | null>(null)
   const [form, setForm] = useState({ nome: '', cognome: '' })
   const [ready, setReady] = useState(false)
+  const [rsvpBadge, setRsvpBadge] = useState<RsvpBadge>(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('guest_name')
     setName(saved && saved.trim() ? saved : null)
     setReady(true)
   }, [])
+
+  // Fetch RSVP status quando il nome è disponibile
+  useEffect(() => {
+    if (!name) return
+    const cognome = localStorage.getItem('guest_surname') || ''
+    if (!cognome) return
+    fetch(`/api/rsvp/status?nome=${encodeURIComponent(name)}&cognome=${encodeURIComponent(cognome)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.status === 'principale') setRsvpBadge(data.rsvp?.partecipa ? 'si' : 'no')
+        else if (data.status === 'accompagnatore') setRsvpBadge('accompagnatore')
+        else setRsvpBadge('none')
+      })
+      .catch(() => setRsvpBadge('none'))
+  }, [name])
 
   function handleSave(e: React.FormEvent) {
     e.preventDefault()
@@ -84,9 +102,37 @@ export default function HomeClient() {
 
       {/* Hero gradient */}
       <section className="bg-hero px-5 py-16 sm:py-24 text-center animate-fade-in">
-        <p className="text-night/60 text-sm sm:text-base tracking-[0.2em] uppercase font-[family-name:var(--font-inter)] mb-6">
+        <p className="text-night/60 text-sm sm:text-base tracking-[0.2em] uppercase font-[family-name:var(--font-inter)] mb-4">
           {greetGuest(name)}
         </p>
+
+        {/* Badge stato RSVP */}
+        {rsvpBadge === 'si' && (
+          <Link href="/rsvp"
+            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-sunset text-white text-sm font-semibold shadow-sm hover:opacity-90 transition-opacity font-[family-name:var(--font-inter)]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Presenza confermata — Modifica
+          </Link>
+        )}
+        {rsvpBadge === 'no' && (
+          <Link href="/rsvp"
+            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-dust/30 text-night text-sm font-semibold hover:bg-dust/50 transition-colors font-[family-name:var(--font-inter)]">
+            Hai risposto che non verrai — Modifica
+          </Link>
+        )}
+        {rsvpBadge === 'accompagnatore' && (
+          <Link href="/rsvp"
+            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-lilac text-night text-sm font-semibold hover:bg-lilac/70 transition-colors font-[family-name:var(--font-inter)]">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Sei già registrato/a come accompagnatore
+          </Link>
+        )}
+        {rsvpBadge === 'none' && (
+          <Link href="/rsvp"
+            className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border-2 border-night/20 text-night/60 text-sm font-semibold hover:border-sunset hover:text-night transition-colors font-[family-name:var(--font-inter)]">
+            Risposta non ancora inviata — Vai all&rsquo;RSVP
+          </Link>
+        )}
 
         <h1 className="font-[family-name:var(--font-lora)] text-4xl sm:text-6xl font-bold text-night leading-tight mb-4">
           Marco &amp; Cristina
