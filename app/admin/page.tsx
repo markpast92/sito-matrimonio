@@ -18,7 +18,7 @@ async function getData() {
     db.from('rsvp').select('*, rsvp_accompagnatori(*)').order('created_at', { ascending: false }),
     db.from('regali').select('*').order('created_at', { ascending: false }),
   ])
-  if (e1 || e2) throw new Error('Errore lettura Supabase — hai eseguito schema.sql?')
+  if (e1 || e2) throw new Error('Errore lettura Supabase - hai eseguito schema.sql?')
   return { rsvps: (rsvps || []) as Rsvp[], regali: (regali || []) as Regalo[] }
 }
 

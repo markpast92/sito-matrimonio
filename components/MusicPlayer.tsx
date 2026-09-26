@@ -11,8 +11,23 @@ export default function MusicPlayer() {
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const widgetRef = useRef<any>(null)
   const initRef = useRef(false)
+  const countRef = useRef(0)        // numero di tracce nella playlist
+  const startedRef = useRef(false)  // true dopo il primo avvio
   const [playing, setPlaying] = useState(false)
   const [ready, setReady] = useState(false)
+
+  // Salta a una traccia casuale (diversa dall'attuale se possibile) e la avvia
+  const playRandom = () => {
+    const widget = widgetRef.current
+    if (!widget) return
+    const count = countRef.current
+    if (count <= 1) { widget.play(); return }
+    widget.getCurrentSoundIndex((current: number) => {
+      let idx = Math.floor(Math.random() * count)
+      if (idx === current) idx = (idx + 1) % count
+      widget.skip(idx) // skip avvia automaticamente la riproduzione
+    })
+  }
 
   useEffect(() => {
     if (initRef.current) return
@@ -24,10 +39,14 @@ export default function MusicPlayer() {
       if (!iframeRef.current) return
       const widget = window.SC.Widget(iframeRef.current)
       widgetRef.current = widget
-      widget.bind(window.SC.Widget.Events.READY, () => setReady(true))
+      widget.bind(window.SC.Widget.Events.READY, () => {
+        widget.getSounds((sounds: unknown[]) => { countRef.current = sounds?.length ?? 0 })
+        setReady(true)
+      })
       widget.bind(window.SC.Widget.Events.PLAY, () => setPlaying(true))
       widget.bind(window.SC.Widget.Events.PAUSE, () => setPlaying(false))
-      widget.bind(window.SC.Widget.Events.FINISH, () => setPlaying(false))
+      // A fine brano, prosegui con un'altra traccia casuale
+      widget.bind(window.SC.Widget.Events.FINISH, () => { setPlaying(false); playRandom() })
     }
     document.body.appendChild(script)
   }, [])
@@ -35,17 +54,24 @@ export default function MusicPlayer() {
   const toggle = () => {
     const widget = widgetRef.current
     if (!widget) return
-    if (playing) { widget.pause() } else { widget.play() }
+    if (playing) {
+      widget.pause()
+    } else if (!startedRef.current) {
+      startedRef.current = true
+      playRandom() // il primo avvio parte da una traccia casuale
+    } else {
+      widget.play()
+    }
   }
 
   return (
     <>
-      {/* Off-screen — display:none e w-px rompono il SC Widget */}
+      {/* Off-screen - display:none e w-px rompono il SC Widget */}
       <iframe
         ref={iframeRef}
         style={{ position: 'absolute', left: '-9999px', top: '-9999px', width: '300px', height: '80px' }}
         src={`https://w.soundcloud.com/player/?url=${encodeURIComponent(PLAYLIST_URL)}&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&buying=false&sharing=false&download=false`}
-        allow="autoplay"
+        allow="autoplay; encrypted-media"
       />
 
       {/* Floating play/pause button */}

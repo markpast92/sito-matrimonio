@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Palette tramonto — unica fonte di verità */
+  /* Palette tramonto - unica fonte di verità */
   --color-night:  #193250;
   --color-dust:   #767293;
   --color-lilac:  #E2CBE1;
@@ -11,6 +11,12 @@
   /* Font */
   --font-lora:  "Lora", serif;
   --font-inter: "Inter", system-ui, sans-serif;
+}
+
+/* ── Scroll ── */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
 }
 
 /* ── Base ── */
@@ -41,7 +47,7 @@ body {
   );
 }
 
-/* Fascia top per le pagine interne — sottile velatura calda sotto la nav */
+/* Fascia top per le pagine interne - sottile velatura calda sotto la nav */
 .bg-page-top {
   background: linear-gradient(180deg,
     rgba(230, 166, 125, 0.12) 0%,

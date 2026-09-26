@@ -130,7 +130,7 @@ export default function RsvpTable({ rsvps }: { rsvps: Rsvp[] }) {
                   <td className="p-3 sm:p-4">{r.cognome}</td>
                   <td className="p-3 sm:p-4">{r.partecipa ? 'Sì' : 'No'}</td>
                   <td className="p-3 sm:p-4 capitalize">{r.menu}</td>
-                  <td className="p-3 sm:p-4 text-dust">{r.allergie || '—'}</td>
+                  <td className="p-3 sm:p-4 text-dust">{r.allergie || '-'}</td>
                   <td className="p-3 sm:p-4">
                     {r.rsvp_accompagnatori?.length > 0 ? (
                       <ul className="list-disc list-inside text-xs sm:text-sm">
@@ -138,7 +138,7 @@ export default function RsvpTable({ rsvps }: { rsvps: Rsvp[] }) {
                           <li key={a.id}>{a.nome} {a.cognome} · {a.menu}{a.allergie ? ` · ${a.allergie}` : ''}</li>
                         ))}
                       </ul>
-                    ) : '—'}
+                    ) : '-'}
                   </td>
                   <td className="p-3 sm:p-4">
                     <div className="flex gap-2 flex-wrap">
@@ -210,7 +210,7 @@ export default function RsvpTable({ rsvps }: { rsvps: Rsvp[] }) {
         <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 overflow-y-auto">
           <div className="bg-white rounded-2xl p-6 max-w-2xl w-full shadow-xl my-8">
             <h3 className="text-lg font-bold text-night mb-5">
-              Modifica RSVP — {editTarget.nome} {editTarget.cognome}
+              Modifica RSVP - {editTarget.nome} {editTarget.cognome}
             </h3>
 
             <div className="grid grid-cols-2 gap-4 mb-4">

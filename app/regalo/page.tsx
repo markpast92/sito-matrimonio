@@ -119,7 +119,7 @@ export default function RegaloPage() {
 
           <button type="submit" disabled={loading}
             className="btn-sunset py-4 text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sunset focus-visible:ring-offset-2 font-[family-name:var(--font-inter)]">
-            {loading ? 'Invio in corso...' : 'Invia — riceverai una email'}
+            {loading ? 'Invio in corso...' : 'Invia - riceverai una email'}
           </button>
         </form>
       </main>

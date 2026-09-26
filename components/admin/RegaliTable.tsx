@@ -76,7 +76,7 @@ export default function RegaliTable({ regali, totImporti }: { regali: Regalo[]; 
     <>
       <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
         <h2 className="text-lg sm:text-2xl font-bold text-night">
-          Regali{totImporti > 0 && <span className="text-sunset font-normal"> — Totale dichiarato: €{totImporti}</span>}
+          Regali{totImporti > 0 && <span className="text-sunset font-normal"> - Totale dichiarato: €{totImporti}</span>}
         </h2>
         {regali.length > 0 && (
           <button onClick={() => setConfirmClear(true)} className={btnDanger}>
@@ -103,10 +103,10 @@ export default function RegaliTable({ regali, totImporti }: { regali: Regalo[]; 
             <tbody>
               {regali.map(r => (
                 <tr key={r.id} className="border-t border-lilac">
-                  <td className="p-3 sm:p-4">{r.nome || '—'}</td>
+                  <td className="p-3 sm:p-4">{r.nome || '-'}</td>
                   <td className="p-3 sm:p-4">{r.email}</td>
-                  <td className="p-3 sm:p-4">{r.importo != null ? `€${r.importo}` : '—'}</td>
-                  <td className="p-3 sm:p-4 text-dust max-w-xs truncate font-[family-name:var(--font-inter)]">{r.messaggio || '—'}</td>
+                  <td className="p-3 sm:p-4">{r.importo != null ? `€${r.importo}` : '-'}</td>
+                  <td className="p-3 sm:p-4 text-dust max-w-xs truncate font-[family-name:var(--font-inter)]">{r.messaggio || '-'}</td>
                   <td className="p-3 sm:p-4 text-dust font-[family-name:var(--font-inter)]">
                     {new Date(r.created_at).toLocaleDateString('it-IT')}
                   </td>
@@ -180,7 +180,7 @@ export default function RegaliTable({ regali, totImporti }: { regali: Regalo[]; 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-xl">
             <h3 className="text-lg font-bold text-night mb-5">
-              Modifica Regalo — {editTarget.nome || editTarget.email}
+              Modifica Regalo - {editTarget.nome || editTarget.email}
             </h3>
 
             <div className="flex flex-col gap-4 mb-4">

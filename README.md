@@ -18,7 +18,7 @@ Inserisci la password dal file `.env` (`SITE_PASSWORD` per gli ospiti, `ADMIN_PA
 
 ---
 
-## Come è fatto — architettura in breve
+## Come è fatto - architettura in breve
 
 Il sito ha 5 sezioni: password → home → RSVP → regalo → musica.
 C'è anche una **dashboard admin** raggiungibile su `/admin`.
@@ -70,7 +70,7 @@ C'è **un solo punto di accesso**: `/password`.
 ### Pagine
 | File | Sezione |
 |------|---------|
-| `app/page.tsx` | Home — carica `HomeClient` |
+| `app/page.tsx` | Home - carica `HomeClient` |
 | `app/password/page.tsx` | Unica pagina di accesso (ospiti e sposi) |
 | `app/rsvp/page.tsx` | Form conferma presenza |
 | `app/regalo/page.tsx` | Form regalo di nozze |
@@ -87,7 +87,7 @@ C'è **un solo punto di accesso**: `/password`.
 ### Dati e logica condivisa
 | File | Cosa fa |
 |------|---------|
-| `lib/constants.ts` | Data, location, URL venue e Google Maps, formula del saluto — modifica qui |
+| `lib/constants.ts` | Data, location, URL venue e Google Maps, formula del saluto - modifica qui |
 | `lib/supabase.ts` | Crea il client Supabase (usato solo nelle API) |
 
 ### API routes (codice server)
@@ -108,11 +108,11 @@ Tutto il tema è in **`app/globals.css`**, nel blocco `@theme`:
 
 ```css
 @theme {
-  --color-night:  #193250;   /* blu notte — testo principale, header, footer */
-  --color-dust:   #767293;   /* viola polvere — testi secondari, placeholder */
-  --color-lilac:  #E2CBE1;   /* lilla chiaro — sfondi sezione, card, bordi */
-  --color-sunset: #E6A67D;   /* arancio tramonto — bottoni, accenti */
-  --color-pale:   #F6FEAA;   /* giallo pallido — sfondo pagina */
+  --color-night:  #193250;   /* blu notte - testo principale, header, footer */
+  --color-dust:   #767293;   /* viola polvere - testi secondari, placeholder */
+  --color-lilac:  #E2CBE1;   /* lilla chiaro - sfondi sezione, card, bordi */
+  --color-sunset: #E6A67D;   /* arancio tramonto - bottoni, accenti */
+  --color-pale:   #F6FEAA;   /* giallo pallido - sfondo pagina */
 }
 ```
 
@@ -148,7 +148,7 @@ Per cambiarlo: sostituisci `Lora` con qualsiasi font di [Google Fonts](https://f
 
 ### Favicon
 
-Sostituisci `app/icon.png` e `public/icon.png` con la tua immagine.
+Sostituisci `app/icon.png` con la tua immagine (gestita automaticamente come favicon dall'App Router).
 
 ---
 
@@ -186,7 +186,7 @@ Il sito è ospitato su [Vercel](https://vercel.com) piano Hobby (gratuito).
 
 1. Vai su [vercel.com](https://vercel.com) → **Add New → Project**
 2. Importa il repository GitHub `sito-matrimonio`
-3. Vercel rileva Next.js automaticamente — non toccare nulla nel form
+3. Vercel rileva Next.js automaticamente - non toccare nulla nel form
 4. Espandi **Environment Variables** e inserisci tutte le variabili del `.env` (esclusa `NODE_TLS_REJECT_UNAUTHORIZED`, quella è solo per sviluppo locale)
 5. Clicca **Deploy**
 

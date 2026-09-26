@@ -34,4 +34,4 @@ CREATE TABLE IF NOT EXISTS regali (
 
 -- RLS abilitata su tutte le tabelle.
 -- La service role key (usata dalle API routes server-side) bypassa sempre RLS.
--- La anon key (pubblica nel browser) non ha accesso a nessuna tabella — nessuna policy = nessun permesso.
+-- La anon key (pubblica nel browser) non ha accesso a nessuna tabella - nessuna policy = nessun permesso.

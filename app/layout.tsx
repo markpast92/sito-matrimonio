@@ -18,7 +18,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Marco & Cristina',
   description: 'Il nostro matrimonio',
-  icons: { icon: '/icon.png' },
+  // La favicon è gestita automaticamente da app/icon.png (convenzione App Router)
 }
 
 export const viewport: Viewport = {

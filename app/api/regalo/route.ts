@@ -48,7 +48,7 @@ export async function POST(req: Request) {
 
   if (insertError) {
     console.error('supabase insert error:', insertError)
-    // L'email è già partita — non chiedere all'utente di riprovare (riceverebbe una mail doppia).
+    // L'email è già partita - non chiedere all'utente di riprovare (riceverebbe una mail doppia).
     // Logghiamo l'errore; si può recuperare il dato dal log Vercel.
   }
 

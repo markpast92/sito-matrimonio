@@ -20,14 +20,14 @@ No test framework or linter is configured.
 
 `middleware.ts` intercepts every request (except `_next/static`, `_next/image`, `favicon.ico`):
 
-1. **Guest gate** — checks `site_auth=ok` cookie. Missing → redirect to `/password`.
-2. **Admin gate** — `/admin/*` additionally requires `admin_auth=ok` cookie.
+1. **Guest gate** - checks `site_auth=ok` cookie. Missing → redirect to `/password`.
+2. **Admin gate** - `/admin/*` additionally requires `admin_auth=ok` cookie.
 
 There is **one login page only**: `/password`. `/api/auth` handles both cases:
 - `SITE_PASSWORD` → sets `site_auth=ok` (30 days), redirects to `/`
 - `ADMIN_PASSWORD` → sets both `site_auth=ok` and `admin_auth=ok`, redirects to `/admin`
 
-Logout (`/api/logout`) deletes both cookies and redirects to `/password`. Guests can never reach `/admin` even if they know the URL — the middleware always sends them back to `/password`.
+Logout (`/api/logout`) deletes both cookies and redirects to `/password`. Guests can never reach `/admin` even if they know the URL - the middleware always sends them back to `/password`.
 
 `Nav` accepts a `simple` boolean prop: when true (used in the admin page) it renders only the M&C logo and the Esci button, hiding all guest navigation links.
 
@@ -45,11 +45,11 @@ Guest name is collected once in `HomeClient` and stored in `localStorage` as `gu
 
 ### Music
 
-`MusicPlayer` (mounted in root layout, always present) loads the SoundCloud Widget API script lazily, initialises an off-screen iframe, and exposes a floating play/pause button (fixed bottom-right). The iframe must have real pixel dimensions — `display:none` or tiny sizes break the SC Widget.
+`MusicPlayer` (mounted in root layout, always present) loads the SoundCloud Widget API script lazily, initialises an off-screen iframe, and exposes a floating play/pause button (fixed bottom-right). The iframe must have real pixel dimensions - `display:none` or tiny sizes break the SC Widget.
 
 ### Color system
 
-Defined in `app/globals.css` via Tailwind v4 `@theme` block as CSS custom properties. Use Tailwind utilities `bg-night`, `text-sunset`, etc. — **never hardcode hex values** in components.
+Defined in `app/globals.css` via Tailwind v4 `@theme` block as CSS custom properties. Use Tailwind utilities `bg-night`, `text-sunset`, etc. - **never hardcode hex values** in components.
 
 | Token      | Hex       | Usage                        |
 |------------|-----------|------------------------------|
