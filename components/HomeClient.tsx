@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import Nav from '@/components/Nav'
-import { greetGuest, WEDDING_DATE, WEDDING_LOCATION, WEDDING_VENUE_URL, WEDDING_MAPS_URL } from '@/lib/constants'
+import { greetGuest, WEDDING_DATE, WEDDING_TIME, WEDDING_LOCATION, WEDDING_VENUE_URL, WEDDING_MAPS_URL } from '@/lib/constants'
 
 type RsvpBadge = 'si' | 'no' | 'accompagnatore' | 'none' | null
 
@@ -138,36 +139,65 @@ export default function HomeClient() {
           Marco &amp; Cristina
         </h1>
 
-        <hr className="divider-sunset mb-6" />
-
         <p className="text-night/70 text-lg sm:text-xl font-[family-name:var(--font-inter)] mb-6">
-          {WEDDING_DATE}
+          {WEDDING_DATE} — {WEDDING_TIME}
         </p>
 
-        {/* Location card */}
-        <div className="w-full max-w-sm mx-auto rounded-2xl shadow-lg overflow-hidden mb-2 border border-white/30">
-          {/* Mappa piccola */}
-          <div className="w-full h-32">
-            <iframe
-              title="Mappa location"
-              width="100%"
-              height="100%"
-              style={{ border: 0, display: 'block' }}
-              loading="lazy"
-              src="https://maps.google.com/maps?q=Via+Giuseppe+Pavone+91,+90151+Palermo&output=embed&z=15"
+        {/* Foto venue */}
+        <div className="w-full max-w-md sm:max-w-xl mx-auto rounded-2xl shadow-lg overflow-hidden mb-6 border border-white/30">
+          <div className="relative w-full h-72 sm:h-96">
+            <Image
+              src="/costa-ponente.jpg"
+              alt={WEDDING_LOCATION}
+              fill
+              sizes="(max-width: 640px) 100vw, 576px"
+              className="object-cover"
+              priority
             />
           </div>
-          {/* Info + link */}
-          <div className="bg-white/80 backdrop-blur-sm px-4 py-3 flex flex-col items-center gap-2.5">
-            <div className="text-center">
-              <p className="text-night font-semibold text-base font-[family-name:var(--font-inter)]">
-                {WEDDING_LOCATION}
-              </p>
-              <p className="text-dust text-sm font-[family-name:var(--font-inter)]">
-                Via Giuseppe Pavone 91 — Mondello, Palermo
-              </p>
+        </div>
+        <p className="text-night/70 text-lg sm:text-xl font-[family-name:var(--font-inter)]">
+          {WEDDING_LOCATION} - Mondello, Palermo
+        </p>
+      </section>
+
+      {/* Info utili */}
+      <section className="bg-white px-5 py-10 text-center">
+        <h2 className="font-[family-name:var(--font-lora)] text-3xl sm:text-5xl font-bold text-night mb-1">
+          Info utili
+        </h2>
+
+        <hr className="divider-sunset !mb-12" />
+
+        <div className="w-full max-w-sm mx-auto text-center">
+          <p className="text-night font-bold text-2xl sm:text-3xl mb-4 font-[family-name:var(--font-lora)]">
+            Dove?
+          </p>
+
+          {/* Location card */}
+          <div className="w-full rounded-2xl shadow-lg overflow-hidden mb-2 border border-lilac">
+            {/* Mappa piccola */}
+            <div className="w-full h-32">
+              <iframe
+                title="Mappa location"
+                width="100%"
+                height="100%"
+                style={{ border: 0, display: 'block' }}
+                loading="lazy"
+                src="https://maps.google.com/maps?q=Via+Giuseppe+Pavone+91,+90151+Palermo&output=embed&z=15"
+              />
             </div>
-            <div className="flex flex-wrap justify-center gap-2">
+            {/* Info + link */}
+            <div className="bg-white px-4 py-3 flex flex-col items-center gap-2.5">
+              <div className="text-center">
+                <p className="text-night font-semibold text-base font-[family-name:var(--font-inter)]">
+                  {WEDDING_LOCATION}
+                </p>
+                <p className="text-dust text-sm font-[family-name:var(--font-inter)]">
+                  Via Giuseppe Pavone 91 — Mondello, Palermo
+                </p>
+              </div>
+              <div className="flex flex-wrap justify-center gap-2">
               <a
                 href={WEDDING_VENUE_URL}
                 target="_blank"
@@ -188,6 +218,7 @@ export default function HomeClient() {
               </a>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
