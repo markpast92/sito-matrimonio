@@ -395,7 +395,7 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <button type="button" onClick={() => setPartecipa(true)}
             className={`py-5 rounded-2xl text-lg font-semibold transition-all duration-200 motion-safe:hover:scale-[1.02] motion-safe:active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-night focus-visible:ring-offset-2 font-[family-name:var(--font-inter)] ${
-              partecipa ? 'btn-sunset' : 'bg-white border-2 border-night/30 text-night hover:border-sunset'
+              partecipa ? 'bg-sunset border-2 border-night text-night shadow-sm hover:bg-sunset/90' : 'bg-white border-2 border-night/30 text-night hover:border-sunset'
             }`}>
             Ci sono!
           </button>

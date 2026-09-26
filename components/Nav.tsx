@@ -40,7 +40,7 @@ function FicoCircle({ size = 72 }: { size?: number }) {
         alt="Marco & Cristina"
         width={size}
         height={size}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain scale-75"
       />
     </div>
   )
@@ -103,9 +103,7 @@ export default function Nav({ simple }: { simple?: boolean }) {
     return (
       <nav className="bg-nav-gradient text-white sticky top-0 z-40 shadow-md">
         <div className="flex items-center justify-between px-5 py-3">
-          <Link href="/" aria-label="Home">
-            <FicoImage priority />
-          </Link>
+          <FicoCircle />
           <LogoutIcon />
         </div>
       </nav>
