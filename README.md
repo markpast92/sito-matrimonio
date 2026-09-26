@@ -9,6 +9,7 @@ Fatto con Next.js, Tailwind, Supabase e Resend. Ospitato su Vercel (piano gratui
 
 ```bash
 npm install
+npm run build
 npm run dev
 # apri http://localhost:3000
 ```
