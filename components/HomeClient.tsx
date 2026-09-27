@@ -97,7 +97,7 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
   },
   {
     q: "Come mi vesto?",
-    a: <p>Si consiglia un abito da sera estivo, con coprispalle o giacca. Scarpe eleganti ma comode — si balla sul prato!</p>,
+    a: <p>Si consiglia un abito da sera estivo, con coprispalle o giacca. Scarpe eleganti ma comode - si balla sul prato!</p>,
   },
   {
     q: "Come prenoto un taxi o un'auto?",
@@ -108,29 +108,35 @@ const FAQ_ITEMS: { q: string; a: React.ReactNode }[] = [
 function FaqAccordion() {
   const [open, setOpen] = useState<number | null>(null)
   return (
-    <div className="max-w-2xl mx-auto flex flex-col gap-2">
-      {FAQ_ITEMS.map((item, i) => (
-        <div key={i} className="border border-night/20 rounded-xl overflow-hidden bg-white">
-          <button
-            onClick={() => setOpen(open === i ? null : i)}
-            aria-expanded={open === i}
-            className="w-full flex justify-between items-center px-5 py-4 text-left text-night font-semibold text-base hover:bg-night/5 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-night focus-visible:ring-inset font-[family-name:var(--font-inter)]"
-          >
-            <span className="pr-4">{item.q}</span>
-            <svg
-              className={`w-5 h-5 shrink-0 transition-transform duration-200 text-sunset ${open === i ? 'rotate-180' : ''}`}
-              viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+    <div className="max-w-md sm:max-w-xl mx-auto flex flex-col gap-2">
+      {FAQ_ITEMS.map((item, i) => {
+        const isOpen = open === i
+        return (
+          <div key={i} className="border border-night/20 rounded-xl overflow-hidden bg-white">
+            <button
+              onClick={() => setOpen(isOpen ? null : i)}
+              aria-expanded={isOpen}
+              className="w-full flex items-center gap-3 px-4 py-4 text-left text-night font-semibold text-base hover:bg-night/5 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-night focus-visible:ring-inset font-[family-name:var(--font-inter)]"
             >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
-          </button>
-          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${open === i ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
-            <div className="px-5 pb-5 pt-1 text-night/80 text-base leading-relaxed font-[family-name:var(--font-inter)] border-t border-night/10">
-              {item.a}
+              {/* Segno + a sinistra: ruota di 45° diventando × quando aperto */}
+              <svg
+                className={`w-5 h-5 shrink-0 transition-transform duration-200 text-sunset ${isOpen ? 'rotate-45' : ''}`}
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              <span>{item.q}</span>
+            </button>
+            <div className={`overflow-hidden transition-all duration-300 ease-in-out ${isOpen ? 'max-h-48 opacity-100' : 'max-h-0 opacity-0'}`}>
+              <div className="px-4 pb-5 pt-1 pl-12 text-night/80 text-base leading-relaxed font-[family-name:var(--font-inter)]">
+                {item.a}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }
@@ -186,7 +192,7 @@ export default function HomeClient() {
           <div className="mx-auto mb-6 w-52">
             <Image
               src="/fico-dindia.png"
-              alt="Marco & Cristina — due fichi d'India vestiti da sposo e sposa"
+              alt="Marco & Cristina - due fichi d'India vestiti da sposo e sposa"
               width={1000}
               height={707}
               className="w-full h-auto"
@@ -241,11 +247,11 @@ export default function HomeClient() {
       {/* Sfondo unico per tutta la home: stesso gradiente arancio/bianco dell'hero */}
       <div className="bg-hero">
       {/* ── 1. HOME / INTRO ──────────────────────────────────────── */}
-      <section id="home" className="px-5 pt-6 pb-12 sm:pt-8 sm:pb-16 text-center animate-fade-in">
+      <section id="home" className="scroll-mt-20 px-5 pt-6 pb-12 sm:pt-8 sm:pb-16 text-center animate-fade-in">
         <div className="mx-auto mb-4 w-full max-w-xs sm:max-w-sm">
           <Image
             src="/fico-dindia.png"
-            alt="Marco & Cristina — due fichi d'India vestiti da sposo e sposa"
+            alt="Marco & Cristina - due fichi d'India vestiti da sposo e sposa"
             width={1000}
             height={707}
             className="w-full h-auto"
@@ -261,13 +267,13 @@ export default function HomeClient() {
           <Link href="/rsvp"
             className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-sunset text-night text-sm font-semibold shadow-sm hover:opacity-90 motion-safe:hover:scale-[1.02] transition-all font-[family-name:var(--font-inter)]">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-            Presenza confermata — Modifica
+            Presenza confermata - Modifica
           </Link>
         )}
         {rsvpBadge === 'no' && (
           <Link href="/rsvp"
             className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full bg-white/60 text-night text-sm font-semibold hover:bg-white/80 transition-colors font-[family-name:var(--font-inter)]">
-            Hai risposto che non verrai — Modifica
+            Hai risposto che non verrai - Modifica
           </Link>
         )}
         {rsvpBadge === 'accompagnatore' && (
@@ -280,7 +286,7 @@ export default function HomeClient() {
         {rsvpBadge === 'none' && (
           <Link href="/rsvp"
             className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border-2 border-night/20 text-night/60 text-sm font-semibold hover:border-sunset hover:text-night transition-colors font-[family-name:var(--font-inter)]">
-            Non hai ancora risposto — vai a Partecipo
+            Non hai ancora risposto - vai a Partecipo
           </Link>
         )}
 
@@ -310,7 +316,7 @@ export default function HomeClient() {
       <SectionDivider />
 
       {/* ── 2. QUANDO ────────────────────────────────────────────── */}
-      <section id="quando" className="px-5 py-8 sm:py-12 text-center">
+      <section id="quando" className="scroll-mt-20 px-5 py-8 sm:py-12 text-center">
         <p className="text-night/70 text-xs uppercase tracking-[0.2em] font-[family-name:var(--font-inter)] mb-2">La data</p>
         <h2 className="font-[family-name:var(--font-lora)] text-3xl sm:text-5xl font-bold text-night mb-2">
           Quando?
@@ -324,7 +330,7 @@ export default function HomeClient() {
           ore {WEDDING_TIME}
         </p>
 
-        <div className="max-w-md mx-auto bg-white/80 rounded-2xl px-6 py-4 shadow-sm border-l-4 border-sunset">
+        <div className="max-w-md sm:max-w-xl mx-auto bg-white/80 rounded-2xl px-6 py-4 shadow-sm border-l-4 border-sunset">
           <p className="text-night text-base sm:text-lg leading-relaxed font-[family-name:var(--font-inter)]">
             Vi chiediamo la cortesia di arrivare puntuali: scatteremo le foto al tramonto e vogliamo avervi tutti con noi!
           </p>
@@ -334,16 +340,16 @@ export default function HomeClient() {
       <SectionDivider />
 
       {/* ── 3. DOVE ──────────────────────────────────────────────── */}
-      <section id="dove" className="px-5 py-8 sm:py-12 text-center">
+      <section id="dove" className="scroll-mt-20 px-5 py-8 sm:py-12 text-center">
         <p className="text-night/70 text-xs uppercase tracking-[0.2em] font-[family-name:var(--font-inter)] mb-2">La location</p>
         <h2 className="font-[family-name:var(--font-lora)] text-3xl sm:text-5xl font-bold text-night mb-2">
           Dove?
         </h2>
         <hr className="divider-sunset !mb-6" />
 
-        <div className="w-full max-w-sm mx-auto">
+        <div className="w-full max-w-md sm:max-w-xl mx-auto">
           <div className="w-full rounded-2xl shadow-lg overflow-hidden border border-night/10">
-            <div className="w-full h-48">
+            <div className="w-full h-48 sm:h-64">
               <iframe
                 title="Mappa location"
                 width="100%"
@@ -359,7 +365,7 @@ export default function HomeClient() {
                   {WEDDING_LOCATION}
                 </p>
                 <p className="text-night/60 text-sm font-[family-name:var(--font-inter)]">
-                  Via Giuseppe Pavone 91 — Mondello, Palermo
+                  Via Giuseppe Pavone 91 - Mondello, Palermo
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
@@ -390,14 +396,14 @@ export default function HomeClient() {
       <SectionDivider />
 
       {/* ── 4. PROGRAMMA ─────────────────────────────────────────── */}
-      <section id="programma" className="px-5 py-8 sm:py-12 text-center">
+      <section id="programma" className="scroll-mt-20 px-5 py-8 sm:py-12 text-center">
         <p className="text-night/70 text-xs uppercase tracking-[0.2em] font-[family-name:var(--font-inter)] mb-2">La giornata</p>
         <h2 className="font-[family-name:var(--font-lora)] text-3xl sm:text-5xl font-bold text-night mb-2">
           Cosa vi aspetta?
         </h2>
         <hr className="divider-sunset !mb-8" />
 
-        <div className="max-w-lg mx-auto text-left">
+        <div className="max-w-md sm:max-w-xl mx-auto text-left">
           <div className="relative pl-10">
             <div className="absolute left-3.5 top-5 bottom-5 w-0.5 bg-night/20" />
             {PROGRAM.map((item, i) => (
@@ -411,8 +417,18 @@ export default function HomeClient() {
                     <p className="font-[family-name:var(--font-lora)] text-night text-lg font-semibold mt-1">
                       {item.title}
                     </p>
+                    {item.details && (
+                      <ul className="mt-3 flex flex-col gap-2.5 border-t border-night/10 pt-3">
+                        {item.details.map((d, j) => (
+                          <li key={j} className="flex items-start gap-2.5 text-night/80 text-base font-[family-name:var(--font-inter)]">
+                            <span className="mt-2 w-1.5 h-1.5 rounded-full bg-sunset shrink-0" aria-hidden="true" />
+                            <span>{d}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                     {item.note && (
-                      <p className="text-night/60 text-sm mt-2 font-[family-name:var(--font-inter)] italic border-t border-night/10 pt-2">
+                      <p className="text-night/60 text-sm mt-3 font-[family-name:var(--font-inter)] italic border-t border-night/10 pt-2">
                         &ldquo;{item.note}&rdquo;
                       </p>
                     )}
@@ -427,7 +443,7 @@ export default function HomeClient() {
       <SectionDivider />
 
       {/* ── 5. FAQ ───────────────────────────────────────────────── */}
-      <section id="faq" className="px-5 py-8 sm:py-12">
+      <section id="faq" className="scroll-mt-20 px-5 py-8 sm:py-12">
         <div className="text-center mb-6">
           <p className="text-night/70 text-xs uppercase tracking-[0.2em] font-[family-name:var(--font-inter)] mb-2">Hai dubbi?</p>
           <h2 className="font-[family-name:var(--font-lora)] text-3xl sm:text-5xl font-bold text-night mb-2">
@@ -440,11 +456,11 @@ export default function HomeClient() {
 
       <SectionDivider />
 
-      {/* ── 6. CTA FINALE ────────────────────────────────────────── */}
-      <section className="px-5 py-8 sm:py-12">
-        <div className="max-w-xl mx-auto text-center">
+      {/* ── 6. CTA FINALE (sfondo bianco, staccato dal gradiente) ──── */}
+      <section className="bg-white px-5 py-12 sm:py-16">
+        <div className="max-w-md sm:max-w-xl mx-auto text-center">
           <h2 className="font-[family-name:var(--font-lora)] text-3xl sm:text-4xl font-bold text-night mb-2">
-            Ci sei?
+            Ci sarai?
           </h2>
           <p className="text-night/70 text-base sm:text-lg mb-6 leading-relaxed font-[family-name:var(--font-inter)]">
             Facci sapere se sarai con noi e, se vuoi, inviaci un pensiero di auguri.

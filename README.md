@@ -1,27 +1,49 @@
 # Sito matrimonio Marco & Cristina
 
-Sito web per il matrimonio del **10 settembre 2027** a **Costa Ponente**, Mondello (Palermo).
-Fatto con Next.js, Tailwind, Supabase e Resend. Ospitato su Vercel (piano gratuito).
+Sito web privato per il matrimonio del **10 settembre 2027** a **Costa Ponente**, Mondello (Palermo).
 
----
+Gli invitati entrano con una password condivisa, confermano la presenza (RSVP) e possono
+richiedere via email le coordinate per il regalo di nozze. Marco e Cristina hanno una
+dashboard riservata con il riepilogo di risposte e regali.
+
+## Funzionalità
+
+- **Accesso protetto** con password unica per gli ospiti (una password separata per l'area admin).
+- **Home** con saluto personalizzato, countdown al giorno del matrimonio, programma della giornata, mappa della location e domande frequenti.
+- **RSVP**: conferma presenza con gestione degli accompagnatori, preferenze alimentari facoltative (vegano, vegetariano, ecc.), allergie e menu bambino. Ogni ospite può modificare la propria risposta.
+- **Regalo di nozze**: l'ospite lascia email e cifra, riceve via email le coordinate per il bonifico (nessun pagamento online).
+- **Musica**: player SoundCloud flottante per far partire la playlist durante l'evento.
+- **Dashboard admin** (`/admin`): tabelle con RSVP, accompagnatori, menu/allergie e regali ricevuti, più i totali.
+
+## Stack tecnologico
+
+| Ambito | Tecnologia |
+|--------|-----------|
+| Framework | [Next.js 15](https://nextjs.org/) (App Router) + TypeScript |
+| Stili | [Tailwind CSS v4](https://tailwindcss.com/) |
+| Database | [Supabase](https://supabase.com/) (Postgres, piano free) |
+| Email | [Resend](https://resend.com/) (email transazionali) |
+| Hosting | [Vercel](https://vercel.com/) (piano Hobby) |
 
 ## Avvio in locale
 
+Serve [Node.js](https://nodejs.org/) 18+ e un file `.env` con le variabili elencate sotto.
+
 ```bash
 npm install
-npm run build
-npm run dev
-# apri http://localhost:3000
+npm run dev        # avvia il server di sviluppo su http://localhost:3000
 ```
 
-Inserisci la password dal file `.env` (`SITE_PASSWORD` per gli ospiti, `ADMIN_PASSWORD` per la dashboard).
+Altri comandi:
 
----
+```bash
+npm run build      # build di produzione (valida anche i tipi TypeScript)
+npm run start      # serve la build di produzione
+```
 
-## Come è fatto - architettura in breve
+All'apertura viene chiesta una password: usa `SITE_PASSWORD` (ospiti) o `ADMIN_PASSWORD` (dashboard), presi dal tuo `.env`.
 
-Il sito ha 5 sezioni: password → home → RSVP → regalo → musica.
-C'è anche una **dashboard admin** raggiungibile su `/admin`.
+## Come funziona
 
 ```
 Browser (ospite o sposo)
@@ -40,121 +62,66 @@ app/api/ (le API)      ← codice che gira sul server (invisibile all'utente)
     └── Resend          ← email (coordinate bancarie)
 ```
 
-### Flusso di autenticazione
+### Autenticazione
 
-C'è **un solo punto di accesso**: `/password`.
-- Password ospiti (`SITE_PASSWORD`) → cookie `site_auth=ok` → home
+C'è **un solo punto di accesso**: la pagina `/password`. La stessa API (`/api/auth`) gestisce entrambi i casi:
+
+- Password ospiti (`SITE_PASSWORD`) → cookie `site_auth=ok` (30 giorni) → home
 - Password sposi (`ADMIN_PASSWORD`) → cookie `site_auth=ok` + `admin_auth=ok` → dashboard
-- "Esci" dalla dashboard cancella entrambi i cookie e torna a `/password`
-- Un ospite non può mai raggiungere `/admin` anche conoscendo l'URL
+- "Esci" cancella entrambi i cookie e riporta a `/password`
+- Un ospite non può mai raggiungere `/admin` anche conoscendo l'URL: `middleware.ts` lo rimanda sempre a `/password`
 
----
+Il nome dell'ospite viene chiesto una volta alla prima visita e salvato nel browser (`localStorage`), così i moduli si precompilano da soli.
 
-## Ruolo di ogni file
+## Struttura del progetto
 
 ### Configurazione
 | File | Cosa fa |
 |------|---------|
-| `.env` | Tutte le chiavi segrete (password, Supabase, Resend, IBAN). **Non va su GitHub.** |
-| `middleware.ts` | Legge i cookie di sessione e decide se far passare l'utente o no |
+| `.env` | Chiavi segrete (password, Supabase, Resend, IBAN). **Non va su GitHub.** |
+| `middleware.ts` | Legge i cookie di sessione e decide se far passare l'utente |
 | `next.config.ts` | Configurazione Next.js |
-| `supabase/schema.sql` | SQL da incollare in Supabase per creare le tabelle |
+| `supabase/schema.sql` | SQL da eseguire in Supabase per creare le tabelle |
 
-### Stili e tema
-| File | Cosa fa |
-|------|---------|
-| `app/globals.css` | Font di base, colori del tema, dimensione testo globale. Modifica qui. |
-| `app/layout.tsx` | Layout radice: carica i font Google, monta MusicPlayer |
-| `app/icon.png` | Favicon del sito |
-
-### Pagine
+### Pagine (`app/`)
 | File | Sezione |
 |------|---------|
-| `app/page.tsx` | Home - carica `HomeClient` |
+| `app/layout.tsx` | Layout radice: carica i font Google, monta il MusicPlayer |
+| `app/globals.css` | Tema (colori, font, variabili del logo), stili globali |
+| `app/page.tsx` | Home — carica `HomeClient` |
 | `app/password/page.tsx` | Unica pagina di accesso (ospiti e sposi) |
-| `app/rsvp/page.tsx` | Form conferma presenza |
-| `app/regalo/page.tsx` | Form regalo di nozze |
-| `app/musica/page.tsx` | Pagina musica (avviso volume, istruzioni player) |
+| `app/rsvp/page.tsx` | Conferma presenza — usa `RsvpSection` |
+| `app/regalo/page.tsx` | Modulo regalo di nozze |
+| `app/musica/page.tsx` | Pagina musica |
 | `app/admin/page.tsx` | Dashboard admin (tabelle RSVP e regali) |
 
-### Componenti riutilizzabili
+### Componenti (`components/`)
 | File | Cosa fa |
 |------|---------|
-| `components/Nav.tsx` | Barra di navigazione. Prop `simple` per la dashboard admin |
-| `components/HomeClient.tsx` | Home page interattiva: overlay nome, saluto, mappa, bottoni |
-| `components/MusicPlayer.tsx` | Player floating SoundCloud: icona speaker fissa in basso a destra |
+| `Nav.tsx` | Navigazione a drawer (overlay). Prop `simple` per la barra admin |
+| `HomeClient.tsx` | Home interattiva: nome, saluto, countdown, programma, mappa, FAQ |
+| `RsvpSection.tsx` | Modulo RSVP: presenza, accompagnatori, menu/preferenze/allergie |
+| `MusicPlayer.tsx` | Player flottante SoundCloud (nascosto sulla pagina di login) |
+| `admin/RsvpTable.tsx`, `admin/RegaliTable.tsx` | Tabelle della dashboard |
 
-### Dati e logica condivisa
+### Dati e logica condivisa (`lib/`)
 | File | Cosa fa |
 |------|---------|
-| `lib/constants.ts` | Data, location, URL venue e Google Maps, formula del saluto - modifica qui |
-| `lib/supabase.ts` | Crea il client Supabase (usato solo nelle API) |
+| `lib/constants.ts` | Data, orario, location, link venue/mappe, saluto, programma — **modifica qui** |
+| `lib/supabase.ts` | Crea i client Supabase (usati solo nelle API) |
 
-### API routes (codice server)
+### API (`app/api/`, codice server)
 | File | Cosa fa |
 |------|---------|
-| `app/api/auth/route.ts` | Login: verifica password ospite o admin, imposta i cookie |
-| `app/api/logout/route.ts` | Cancella tutti i cookie e reindirizza a `/password` |
-| `app/api/rsvp/route.ts` | Salva o aggiorna un RSVP su Supabase |
-| `app/api/regalo/route.ts` | Invia l'email con IBAN via Resend, salva su Supabase |
-
----
-
-## Guida per chi fa solo frontend
-
-### Cambiare i colori
-
-Tutto il tema è in **`app/globals.css`**, nel blocco `@theme`:
-
-```css
-@theme {
-  --color-night:  #193250;   /* blu notte - testo principale, header, footer */
-  --color-dust:   #767293;   /* viola polvere - testi secondari, placeholder */
-  --color-lilac:  #E2CBE1;   /* lilla chiaro - sfondi sezione, card, bordi */
-  --color-sunset: #E6A67D;   /* arancio tramonto - bottoni, accenti */
-  --color-pale:   #F6FEAA;   /* giallo pallido - sfondo pagina */
-}
-```
-
-Cambia i valori esadecimali e il colore si aggiorna ovunque nel sito.
-Nei componenti i colori si usano come classi Tailwind: `bg-sunset`, `text-night`, `border-lilac`, ecc.
-
-Verifica sempre che il contrasto testo/sfondo sia leggibile (standard AA) con [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/).
-
-### Cambiare il font
-
-Il font è impostato in **`app/layout.tsx`**:
-
-```typescript
-import { Lora } from 'next/font/google'
-const lora = Lora({ subsets: ['latin'], variable: '--font-lora', display: 'swap' })
-```
-
-Per cambiarlo: sostituisci `Lora` con qualsiasi font di [Google Fonts](https://fonts.google.com/).
-
-### Cambiare i testi delle pagine
-
-| Cosa cambiare | Dove |
-|---|---|
-| Saluto personalizzato | `lib/constants.ts` → `greetGuest` |
-| Data del matrimonio | `lib/constants.ts` → `WEDDING_DATE` |
-| Nome della location | `lib/constants.ts` → `WEDDING_LOCATION` |
-| Link sito della location | `lib/constants.ts` → `WEDDING_VENUE_URL` |
-| Link Google Maps | `lib/constants.ts` → `WEDDING_MAPS_URL` |
-| Testo intro home | `components/HomeClient.tsx` |
-| Testo guida RSVP | `app/rsvp/page.tsx` |
-| Testo spiegazione regalo | `app/regalo/page.tsx` |
-| Testo email regalo | `app/api/regalo/route.ts` → `html:` nella chiamata Resend |
-
-### Favicon
-
-Sostituisci `app/icon.png` con la tua immagine (gestita automaticamente come favicon dall'App Router).
-
----
+| `auth/route.ts` | Login: verifica la password ospite o admin e imposta i cookie |
+| `logout/route.ts` | Cancella i cookie e reindirizza a `/password` |
+| `rsvp/route.ts` | Salva o aggiorna un RSVP su Supabase |
+| `rsvp/status/route.ts` | Controlla se un nome è già registrato (ospite o accompagnatore) |
+| `regalo/route.ts` | Invia l'email con l'IBAN via Resend e salva la richiesta su Supabase |
 
 ## Variabili d'ambiente (`.env`)
 
-Il file `.env` non va mai su GitHub. Va creato manualmente in locale e le stesse variabili vanno inserite su Vercel (Settings → Environment Variables).
+Il file `.env` non va mai su GitHub. Va creato in locale e le stesse variabili vanno inserite su Vercel (Settings → Environment Variables). Le variabili `NEXT_PUBLIC_*` sono esposte al browser; tutte le altre sono solo lato server.
 
 ```
 SITE_PASSWORD                     password che gli ospiti inseriscono per entrare
@@ -163,50 +130,43 @@ NEXT_PUBLIC_SUPABASE_URL          URL del progetto Supabase
 NEXT_PUBLIC_SUPABASE_ANON_KEY     chiave pubblica Supabase
 SUPABASE_SERVICE_ROLE_KEY         chiave privata Supabase (solo server)
 RESEND_API_KEY                    chiave API Resend per le email
-RESEND_FROM                       indirizzo mittente email
+RESEND_FROM                       indirizzo mittente delle email
 WEDDING_IBAN                      IBAN per i bonifici regalo
 WEDDING_INTESTATARIO              intestatario del conto
 WEDDING_CAUSALE_PREFIX            inizio della causale ("Regalo matrimonio...")
 ```
 
----
-
 ## Database (Supabase)
 
-Esegui `supabase/schema.sql` una volta sola nella SQL Editor di Supabase.
-Crea tre tabelle: `rsvp`, `rsvp_accompagnatori`, `regali`.
+Esegui `supabase/schema.sql` **una volta sola** nella SQL Editor di Supabase.
+Crea tre tabelle:
 
----
+- `rsvp` — una riga per ospite principale (chiave `nome,cognome`, upsert a ogni salvataggio)
+- `rsvp_accompagnatori` — accompagnatori collegati a un RSVP (ricreati a ogni aggiornamento)
+- `regali` — richieste di regalo (email, importo dichiarato, messaggio)
 
 ## Deploy su Vercel
 
-Il sito è ospitato su [Vercel](https://vercel.com) piano Hobby (gratuito).
+Il sito è ospitato su Vercel (piano Hobby, gratuito).
 
-### Primo deploy
+**Primo deploy:**
 
-1. Vai su [vercel.com](https://vercel.com) → **Add New → Project**
+1. Su [vercel.com](https://vercel.com) → **Add New → Project**
 2. Importa il repository GitHub `sito-matrimonio`
-3. Vercel rileva Next.js automaticamente - non toccare nulla nel form
-4. Espandi **Environment Variables** e inserisci tutte le variabili del `.env` (esclusa `NODE_TLS_REJECT_UNAUTHORIZED`, quella è solo per sviluppo locale)
+3. Vercel rileva Next.js automaticamente — non serve toccare il form
+4. Espandi **Environment Variables** e inserisci tutte le variabili del `.env`
 5. Clicca **Deploy**
 
-Il sito sarà disponibile su `sito-matrimonio-xxxx.vercel.app`.
+**Deploy continuo:** ogni `git push` su `main` fa partire automaticamente un nuovo deploy.
 
-### Deploy continuo (CI/CD)
-
-Ogni `git push` su `main` trigghera automaticamente un nuovo deploy su Vercel. Non serve fare nulla di manuale.
-
-### Aggiornare una variabile d'ambiente
-
-Vercel → Settings → Environment Variables → modifica il valore → fai un nuovo deploy (o aspetta il prossimo push).
-
----
+**Aggiornare una variabile:** Settings → Environment Variables → modifica → nuovo deploy (o attendi il prossimo push).
 
 ## Keep-alive Supabase
 
 Il piano free di Supabase mette in pausa i progetti dopo 7 giorni di inattività.
-Il workflow `.github/workflows/keep-alive.yml` fa un ping ogni 5 giorni, così il progetto non va mai in pausa.
+Il workflow `.github/workflows/keep-alive.yml` fa un ping ogni 5 giorni per tenerlo attivo.
 
 Richiede due secret nella repository GitHub (Settings → Secrets and variables → Actions):
+
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`

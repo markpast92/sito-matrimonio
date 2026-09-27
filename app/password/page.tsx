@@ -34,14 +34,14 @@ export default function PasswordPage() {
   return (
     <main className="min-h-screen bg-hero flex items-center justify-center p-5">
       <div className="w-full max-w-sm animate-slide-up">
-        {/* Logo: illustrazione trasparente dei due fichi d'India */}
-        <div className="mx-auto mb-4 w-52">
+        {/* Logo: illustrazione trasparente dei due fichi d'India.
+            Lo zoom è regolabile via --fico-hero-zoom (vedi globals.css). */}
+        <div className="fico-hero mx-auto mb-4 w-52">
           <Image
             src="/fico-dindia.png"
-            alt="Marco & Cristina — due fichi d'India vestiti da sposo e sposa"
+            alt="Marco & Cristina - due fichi d'India vestiti da sposo e sposa"
             width={1000}
             height={707}
-            className="w-full h-auto"
             priority
           />
         </div>
@@ -67,7 +67,7 @@ export default function PasswordPage() {
               autoComplete="current-password"
             />
             {error && (
-              <p role="alert" className="text-red-600 text-center font-medium text-sm font-[family-name:var(--font-inter)]">
+              <p role="alert" className="text-error text-center font-medium text-sm font-[family-name:var(--font-inter)]">
                 {error}
               </p>
             )}

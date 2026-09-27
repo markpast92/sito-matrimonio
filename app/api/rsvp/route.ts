@@ -5,12 +5,12 @@ type Ospite = {
   nome: string
   cognome: string
   menu: string
-  menuAltro: string
   allergie: string
 }
 
-const menuStr = (o: Ospite) =>
-  o.menu === 'altro' ? `altro: ${o.menuAltro || ''}`.trim() : o.menu
+// Il menu arriva già come stringa pronta (es. "standard", "vegano",
+// "non mangio carne", "menu bambino", "senza menu").
+const menuStr = (o: Ospite) => (o.menu?.trim() || 'standard')
 
 export async function POST(req: Request) {
   const { principale, accompagnatori, partecipa } = await req.json()

@@ -4,11 +4,14 @@ import Link from 'next/link'
 
 // ── Tipi ──────────────────────────────────────────────────────────────────────
 
+type Preferenza = '' | 'vegano' | 'vegetariano' | 'no-carne' | 'no-pesce'
+
 type Ospite = {
   nome: string
   cognome: string
-  menu: 'standard' | 'vegetariano' | 'vegano' | 'altro'
-  menuAltro: string
+  bambino: boolean
+  preferenza: Preferenza          // '' = menu standard
+  menuBambino: 'bambino' | 'senza'
   allergie: string
 }
 
@@ -16,78 +19,159 @@ type AccompagnatoreDb = { id: string; rsvp_id: string; nome: string; cognome: st
 type ExistingRsvp = { id: string; nome: string; cognome: string; partecipa: boolean; menu: string; allergie: string | null; rsvp_accompagnatori: AccompagnatoreDb[] }
 type CheckState = 'loading' | 'none' | 'principale' | 'accompagnatore'
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Costanti menu ───────────────────────────────────────────────────────────
 
-const newOspite = (): Ospite => ({ nome: '', cognome: '', menu: 'standard', menuAltro: '', allergie: '' })
+const PREFERENZE: { value: Exclude<Preferenza, ''>; label: string }[] = [
+  { value: 'vegano',      label: 'Vegano' },
+  { value: 'vegetariano', label: 'Vegetariano' },
+  { value: 'no-carne',    label: 'Non mangio carne' },
+  { value: 'no-pesce',    label: 'Non mangio pesce' },
+]
 
-function dbMenuToForm(menu: string): Pick<Ospite, 'menu' | 'menuAltro'> {
-  if (menu === 'standard' || menu === 'vegetariano' || menu === 'vegano') return { menu, menuAltro: '' }
-  if (menu === 'altro') return { menu: 'altro', menuAltro: '' }
-  return { menu: 'altro', menuAltro: menu }
+const PREF_TO_DB: Record<Exclude<Preferenza, ''>, string> = {
+  vegano: 'vegano',
+  vegetariano: 'vegetariano',
+  'no-carne': 'non mangio carne',
+  'no-pesce': 'non mangio pesce',
 }
 
-const MENU = [
-  { value: 'standard',    label: 'Menu standard' },
-  { value: 'vegetariano', label: 'Vegetariano' },
-  { value: 'vegano',      label: 'Vegano' },
-  { value: 'altro',       label: 'Altro (specifica)' },
-]
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+const newOspite = (): Ospite => ({ nome: '', cognome: '', bambino: false, preferenza: '', menuBambino: 'bambino', allergie: '' })
+
+// Traduce lo stato del form nella stringa salvata a DB
+function ospiteToMenu(o: Ospite): string {
+  if (o.bambino) return o.menuBambino === 'senza' ? 'senza menu' : 'menu bambino'
+  if (o.preferenza) return PREF_TO_DB[o.preferenza]
+  return 'standard'
+}
+
+// Interpreta la stringa a DB per ripopolare il form in modifica
+function parseMenu(menu: string): Pick<Ospite, 'bambino' | 'preferenza' | 'menuBambino'> {
+  const m = (menu || '').trim().toLowerCase()
+  if (m === 'menu bambino') return { bambino: true, preferenza: '', menuBambino: 'bambino' }
+  if (m === 'senza menu')   return { bambino: true, preferenza: '', menuBambino: 'senza' }
+  const entry = (Object.entries(PREF_TO_DB) as [Exclude<Preferenza, ''>, string][]).find(([, db]) => db === m)
+  if (entry) return { bambino: false, preferenza: entry[0], menuBambino: 'bambino' }
+  return { bambino: false, preferenza: '', menuBambino: 'bambino' }
+}
+
+// Etichetta leggibile per la vista di riepilogo
+function menuDisplay(menu?: string | null): string {
+  const raw = (menu || '').trim()
+  const m = raw.toLowerCase()
+  if (!m || m === 'standard') return 'Menu standard'
+  if (m === 'menu bambino') return 'Menu bambino'
+  if (m === 'senza menu') return 'Senza menu'
+  if (m.startsWith('altro:')) return raw.slice(raw.indexOf(':') + 1).trim() || 'Altro'
+  return raw.charAt(0).toUpperCase() + raw.slice(1)
+}
 
 const inputCls = "border-2 border-night/60 rounded-xl px-4 py-3.5 text-lg outline-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-night focus-visible:ring-offset-2 transition-all w-full placeholder:text-night/30 font-[family-name:var(--font-inter)]"
 
 // ── Sub-componenti ────────────────────────────────────────────────────────────
 
-function MenuAllergie({ ospite, onChange, prefix }: {
-  ospite: Ospite
-  onChange: (f: keyof Ospite, v: string) => void
-  prefix: string
-}) {
+// Sezione richiudibile ("radio a scomparsa"): parte aperta se ha già un valore
+function Collapsible({ label, active, children }: { label: string; active: boolean; children: React.ReactNode }) {
+  const [open, setOpen] = useState(active)
   return (
-    <div className="flex flex-col gap-4">
-      <div>
-        <p className="text-night text-base font-semibold mb-3 font-[family-name:var(--font-inter)]">Menu</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          {MENU.map(opt => (
-            <label key={opt.value}
-              className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 cursor-pointer transition-all duration-150 hover:border-sunset ${
-                ospite.menu === opt.value ? 'border-sunset bg-gradient-to-r from-sunset/10 to-lilac/10' : 'border-night/40'
-              }`}>
-              <input type="radio" name={`menu-${prefix}`} value={opt.value}
-                checked={ospite.menu === opt.value} onChange={() => onChange('menu', opt.value)}
-                className="w-5 h-5 accent-sunset shrink-0" />
-              <span className="text-base font-[family-name:var(--font-inter)]">{opt.label}</span>
-            </label>
-          ))}
-        </div>
-        {ospite.menu === 'altro' && (
-          <input type="text" placeholder="Descrivi le tue esigenze alimentari..."
-            value={ospite.menuAltro} onChange={e => onChange('menuAltro', e.target.value)}
-            className={`mt-3 ${inputCls}`} />
-        )}
-      </div>
-      <div>
-        <label className="text-night text-base font-semibold block mb-2 font-[family-name:var(--font-inter)]">
-          Allergie o intolleranze <span className="text-night/50 font-normal">(facoltativo)</span>
-        </label>
-        <input type="text" placeholder="Es. glutine, lattosio, frutta a guscio..."
-          value={ospite.allergie} onChange={e => onChange('allergie', e.target.value)} className={inputCls} />
+    <div className="border-2 border-night/25 rounded-xl overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        className="w-full flex items-center gap-3 px-4 py-3.5 text-left text-night font-semibold text-base hover:bg-night/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-night focus-visible:ring-inset font-[family-name:var(--font-inter)]"
+      >
+        <svg className={`w-5 h-5 shrink-0 text-sunset transition-transform duration-200 ${open ? 'rotate-45' : ''}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        <span>{label}</span>
+        {active && <span className="ml-auto w-2 h-2 rounded-full bg-sunset shrink-0" aria-hidden="true" />}
+      </button>
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${open ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'}`}>
+        <div className="px-4 pb-4 pt-1">{children}</div>
       </div>
     </div>
   )
 }
 
+function MenuAllergie({ ospite, onChange, isChild, prefix }: {
+  ospite: Ospite
+  onChange: <K extends keyof Ospite>(f: K, v: Ospite[K]) => void
+  isChild: boolean
+  prefix: string
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      {isChild ? (
+        <div>
+          <p className="text-night text-base font-semibold mb-3 font-[family-name:var(--font-inter)]">Menu per il bambino/a</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {([{ value: 'bambino', label: 'Menu bambino' }, { value: 'senza', label: 'Senza menu' }] as const).map(opt => (
+              <label key={opt.value}
+                className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border-2 cursor-pointer transition-colors duration-150 hover:border-sunset ${
+                  ospite.menuBambino === opt.value ? 'border-sunset bg-sunset/10' : 'border-night/40'
+                }`}>
+                <input type="radio" name={`menub-${prefix}`} value={opt.value}
+                  checked={ospite.menuBambino === opt.value}
+                  onChange={() => onChange('menuBambino', opt.value)}
+                  className="w-5 h-5 accent-sunset shrink-0" />
+                <span className="text-base font-[family-name:var(--font-inter)]">{opt.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <>
+          <p className="text-night/70 text-sm sm:text-base leading-relaxed font-[family-name:var(--font-inter)]">
+            Per tutti è previsto il nostro <strong className="text-night">menu completo</strong>. Se hai esigenze
+            particolari aggiungile qui sotto, altrimenti non devi fare nulla.
+          </p>
+          <Collapsible label="Ho una preferenza alimentare" active={ospite.preferenza !== ''}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {PREFERENZE.map(opt => (
+                <label key={opt.value}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl border-2 cursor-pointer transition-colors duration-150 hover:border-sunset ${
+                    ospite.preferenza === opt.value ? 'border-sunset bg-sunset/10' : 'border-night/40'
+                  }`}>
+                  <input type="radio" name={`pref-${prefix}`} value={opt.value}
+                    checked={ospite.preferenza === opt.value}
+                    onChange={() => onChange('preferenza', opt.value)}
+                    className="w-5 h-5 accent-sunset shrink-0" />
+                  <span className="text-base font-[family-name:var(--font-inter)]">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+            {ospite.preferenza && (
+              <button type="button" onClick={() => onChange('preferenza', '')}
+                className="mt-3 text-night/60 underline text-sm hover:text-night transition-colors font-[family-name:var(--font-inter)]">
+                Nessuna preferenza (torna al menu standard)
+              </button>
+            )}
+          </Collapsible>
+        </>
+      )}
+
+      <Collapsible label="Ho un'allergia o un'intolleranza" active={ospite.allergie.trim() !== ''}>
+        <input type="text" placeholder="Es. glutine, lattosio, frutta a guscio…"
+          value={ospite.allergie} onChange={e => onChange('allergie', e.target.value)} className={inputCls} />
+      </Collapsible>
+    </div>
+  )
+}
+
 function AccompagnatoreCard({ ospite, index, onChange, onRemove }: {
-  ospite: Ospite; index: number; onChange: (f: keyof Ospite, v: string) => void; onRemove: () => void
+  ospite: Ospite; index: number; onChange: <K extends keyof Ospite>(f: K, v: Ospite[K]) => void; onRemove: () => void
 }) {
   return (
     <div className="border-2 border-night/30 rounded-2xl p-5 flex flex-col gap-4 animate-slide-up">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-3">
           <span className="w-7 h-7 rounded-full btn-sunset flex items-center justify-center text-sm font-bold font-[family-name:var(--font-inter)]">{index + 1}</span>
-          <h3 className="text-lg font-semibold text-night">Accompagnatore</h3>
+          <h3 className="text-lg font-semibold text-night font-[family-name:var(--font-lora)]">Accompagnatore</h3>
         </div>
         <button type="button" onClick={onRemove}
-          className="text-night/50 underline text-base hover:text-night transition-colors font-[family-name:var(--font-inter)]">
+          className="text-night/60 underline text-base hover:text-night transition-colors font-[family-name:var(--font-inter)]">
           Rimuovi
         </button>
       </div>
@@ -97,7 +181,16 @@ function AccompagnatoreCard({ ospite, index, onChange, onRemove }: {
         <input type="text" placeholder="Cognome" value={ospite.cognome}
           onChange={e => onChange('cognome', e.target.value)} required className={inputCls} />
       </div>
-      <MenuAllergie ospite={ospite} onChange={onChange} prefix={`acc-${index}`} />
+
+      {/* Flag bambino: cambia le opzioni di menu */}
+      <label className="flex items-center gap-3 cursor-pointer select-none py-1">
+        <input type="checkbox" checked={ospite.bambino}
+          onChange={e => onChange('bambino', e.target.checked)}
+          className="w-5 h-5 accent-sunset shrink-0" />
+        <span className="text-night text-base font-[family-name:var(--font-inter)]">È un bambino/a</span>
+      </label>
+
+      <MenuAllergie ospite={ospite} onChange={onChange} isChild={ospite.bambino} prefix={`acc-${index}`} />
     </div>
   )
 }
@@ -120,12 +213,12 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
 
   function populateFromExisting(rsvp: ExistingRsvp) {
     setPartecipa(rsvp.partecipa)
-    const { menu, menuAltro } = dbMenuToForm(rsvp.menu)
-    setPrincipale({ nome: rsvp.nome, cognome: rsvp.cognome, menu, menuAltro, allergie: rsvp.allergie ?? '' })
-    setAccompagnatori((rsvp.rsvp_accompagnatori ?? []).map(a => {
-      const { menu: m, menuAltro: ma } = dbMenuToForm(a.menu)
-      return { nome: a.nome, cognome: a.cognome, menu: m, menuAltro: ma, allergie: a.allergie ?? '' }
-    }))
+    const p = parseMenu(rsvp.menu)
+    // Il principale è sempre un adulto
+    setPrincipale({ nome: rsvp.nome, cognome: rsvp.cognome, bambino: false, preferenza: p.preferenza, menuBambino: 'bambino', allergie: rsvp.allergie ?? '' })
+    setAccompagnatori((rsvp.rsvp_accompagnatori ?? []).map(a => ({
+      nome: a.nome, cognome: a.cognome, ...parseMenu(a.menu), allergie: a.allergie ?? '',
+    })))
   }
 
   async function checkStatus(nome: string, cognome: string): Promise<CheckState> {
@@ -159,8 +252,8 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  function updatePrincipale(f: keyof Ospite, v: string) { setPrincipale(p => ({ ...p, [f]: v })) }
-  function updateAcc(i: number, f: keyof Ospite, v: string) {
+  function updatePrincipale<K extends keyof Ospite>(f: K, v: Ospite[K]) { setPrincipale(p => ({ ...p, [f]: v })) }
+  function updateAcc<K extends keyof Ospite>(i: number, f: K, v: Ospite[K]) {
     setAccompagnatori(a => a.map((o, idx) => idx === i ? { ...o, [f]: v } : o))
   }
 
@@ -180,14 +273,21 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
     }
 
     try {
-      const menuValue = partecipa ? (principale.menu === 'altro' ? (principale.menuAltro.trim() || 'altro') : principale.menu) : 'standard'
       const res = await fetch('/api/rsvp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          principale: { ...principale, menu: menuValue },
+          principale: {
+            nome: principale.nome.trim(),
+            cognome: principale.cognome.trim(),
+            menu: ospiteToMenu(principale),
+            allergie: principale.allergie,
+          },
           accompagnatori: accompagnatori.map(a => ({
-            ...a, menu: a.menu === 'altro' ? (a.menuAltro.trim() || 'altro') : a.menu,
+            nome: a.nome,
+            cognome: a.cognome,
+            menu: ospiteToMenu(a),
+            allergie: a.allergie,
           })),
           partecipa,
         }),
@@ -271,15 +371,12 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
   if (checkState === 'accompagnatore' && !isEditing) {
     return (
       <div className="card p-7 animate-slide-up">
-        <div className="flex items-start gap-4 mb-5">
-          <span className="text-3xl leading-none mt-0.5">ℹ️</span>
-          <div>
-            <Heading className="text-xl font-bold text-night mb-1 font-[family-name:var(--font-lora)]">Sei già segnato/a</Heading>
-            <p className="text-night/70 text-base font-[family-name:var(--font-inter)]">
-              Il tuo nome è già registrato come accompagnatore/a di{' '}
-              <strong className="text-night">{mainGuest?.nome} {mainGuest?.cognome}</strong>.
-            </p>
-          </div>
+        <div className="mb-5">
+          <Heading className="text-xl font-bold text-night mb-1 font-[family-name:var(--font-lora)]">Sei già segnato/a</Heading>
+          <p className="text-night/70 text-base font-[family-name:var(--font-inter)]">
+            Il tuo nome è già registrato come accompagnatore/a di{' '}
+            <strong className="text-night">{mainGuest?.nome} {mainGuest?.cognome}</strong>.
+          </p>
         </div>
         <p className="text-night/70 text-base mb-6 font-[family-name:var(--font-inter)]">
           Per aggiornare il tuo menu o comunicare allergie, chiedi a{' '}
@@ -297,7 +394,6 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
 
   // ── Vista: già registrato come principale ──────────────────────────────────
   if (checkState === 'principale' && !isEditing) {
-    const menuLabel = MENU.find(m => m.value === existingRsvp?.menu)?.label ?? existingRsvp?.menu ?? '-'
     return (
       <div>
         {saveSuccess && (
@@ -309,7 +405,7 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
 
         <div className="card p-7 animate-slide-up">
           <div className="flex items-start gap-4 mb-5">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${existingRsvp?.partecipa ? 'bg-sunset text-white' : 'bg-night/20 text-night'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${existingRsvp?.partecipa ? 'bg-sunset text-night' : 'bg-night/20 text-night'}`}>
               {existingRsvp?.partecipa ? (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               ) : (
@@ -327,24 +423,28 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
           </div>
 
           {existingRsvp?.partecipa && (
-            <div className="border-t border-lilac pt-5 mt-2 flex flex-col gap-2 text-base font-[family-name:var(--font-inter)]">
-              <div className="flex gap-2">
-                <span className="text-night/50 w-28 shrink-0">Menu</span>
-                <span className="text-night capitalize">{menuLabel}</span>
-              </div>
-              <div className="flex gap-2">
-                <span className="text-night/50 w-28 shrink-0">Allergie</span>
-                <span className="text-night">{existingRsvp.allergie || 'Nessuna'}</span>
-              </div>
+            <div className="border-t border-lilac pt-5 mt-2 flex flex-col gap-5 font-[family-name:var(--font-inter)]">
+              {/* I tuoi dati */}
+              <dl className="grid grid-cols-[6rem_1fr] gap-x-4 gap-y-2 text-base">
+                <dt className="text-night/50">Menu</dt>
+                <dd className="text-night break-words">{menuDisplay(existingRsvp.menu)}</dd>
+                <dt className="text-night/50">Allergie</dt>
+                <dd className="text-night break-words">{existingRsvp.allergie || 'Nessuna'}</dd>
+              </dl>
+
+              {/* Accompagnatori */}
               {(existingRsvp.rsvp_accompagnatori?.length ?? 0) > 0 && (
-                <div className="flex gap-2">
-                  <span className="text-night/50 w-28 shrink-0">Accompagnatori</span>
-                  <ul className="flex flex-col gap-0.5">
+                <div>
+                  <p className="text-night/50 text-xs uppercase tracking-[0.14em] mb-2">
+                    Accompagnatori ({existingRsvp.rsvp_accompagnatori.length})
+                  </p>
+                  <ul className="flex flex-col gap-2">
                     {existingRsvp.rsvp_accompagnatori.map(a => (
-                      <li key={a.id} className="text-night">
-                        {a.nome} {a.cognome}
-                        <span className="text-night/50 text-sm"> · {MENU.find(m => m.value === a.menu)?.label ?? a.menu}</span>
-                        {a.allergie && <span className="text-night/50 text-sm"> · {a.allergie}</span>}
+                      <li key={a.id} className="rounded-xl border border-night/10 bg-night/[0.03] px-4 py-3">
+                        <p className="text-night font-semibold break-words">{a.nome} {a.cognome}</p>
+                        <p className="text-night/60 text-sm mt-0.5 break-words">
+                          {menuDisplay(a.menu)}{a.allergie ? ` · ${a.allergie}` : ''}
+                        </p>
                       </li>
                     ))}
                   </ul>
@@ -428,7 +528,7 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
         {partecipa && (
           <>
             <hr className="border-night/10" />
-            <MenuAllergie ospite={principale} onChange={updatePrincipale} prefix="principale" />
+            <MenuAllergie ospite={principale} onChange={updatePrincipale} isChild={false} prefix="principale" />
             {accompagnatori.length > 0 && <hr className="border-night/10" />}
             {accompagnatori.map((acc, i) => (
               <AccompagnatoreCard key={i} ospite={acc} index={i}
@@ -443,7 +543,7 @@ export default function RsvpSection({ embedded }: { embedded?: boolean }) {
         )}
 
         {error && (
-          <p role="alert" className="text-red-600 text-base font-medium text-center font-[family-name:var(--font-inter)]">{error}</p>
+          <p role="alert" className="text-error text-base font-medium text-center font-[family-name:var(--font-inter)]">{error}</p>
         )}
 
         <button type="submit" disabled={loading}

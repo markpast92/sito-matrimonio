@@ -10,8 +10,17 @@ export const WEDDING_MAPS_URL = 'https://www.google.com/maps/place/Costa+Ponente
 // 10 settembre 2027, ore 19:00 CEST (UTC+2) → 17:00 UTC
 export const WEDDING_DATETIME_UTC = new Date(Date.UTC(2027, 8, 10, 17, 0, 0))
 
-export type ProgramItem = { time: string; title: string; note?: string }
+export type ProgramItem = { time: string; title: string; details?: string[]; note?: string }
 export const PROGRAM: ProgramItem[] = [
-  { time: '19:00', title: 'Cerimonia' },
-  { time: '20:00', title: 'Aperitivo e festeggiamenti', note: 'Vogliamo vedervi tutti ballare!' },
+  { time: '19:00', title: 'Inizio della cerimonia', note: 'Ci sposeremo al tramonto' },
+  {
+    time: '20:00',
+    title: 'Aperitivo e festeggiamenti',
+    details: [
+      'Aperitivo di benvenuto con open bar e accompagnamento musicale',
+      'A tavola: primi serviti e ricco buffet di secondi, tra un ballo e l’altro',
+      'Taglio della torta e buffet di dolci',
+    ],
+    note: 'Vogliamo vedervi tutti ballare!',
+  },
 ]

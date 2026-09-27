@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
+import { usePathname } from 'next/navigation'
 
 declare global {
   interface Window { SC: any }
@@ -8,6 +9,7 @@ declare global {
 const PLAYLIST_URL = 'https://soundcloud.com/marco-pastorello-609505187/sets/sito-matrimonio'
 
 export default function MusicPlayer() {
+  const pathname = usePathname()
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const widgetRef = useRef<any>(null)
   const initRef = useRef(false)
@@ -63,6 +65,9 @@ export default function MusicPlayer() {
       widget.play()
     }
   }
+
+  // Nella schermata di login la musica non deve comparire
+  if (pathname === '/password') return null
 
   return (
     <>
